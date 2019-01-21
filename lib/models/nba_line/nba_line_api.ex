@@ -36,8 +36,7 @@ defmodule NbaLine.Api do
     # bet always represents true false statement about line
     final_diff = Map.get(params, "final_difference", nil)
 
-    result =
-      case {line, final_diff, bet} do
+    result = case {line, final_diff, bet} do
         {line, final_diff, bet} when line > 0 and final_diff < 0 ->
           # home team favored, home team lost
           cond do
@@ -75,7 +74,7 @@ defmodule NbaLine.Api do
           end
       end
 
-      complete_bet_changeset = NbaLine.complete_bet_changeset(nba_line, %{"result" => result})
+    complete_bet_changeset = NbaLine.complete_bet_changeset(nba_line, %{"result" => result})
 
     if complete_bet_changeset.valid? do
       case Repo.update(complete_bet_changeset) do
