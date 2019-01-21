@@ -6,8 +6,8 @@ defmodule NbaLinesServer.NbaLine do
     
   schema "nba_lines" do
       belongs_to :nba_game, NbaLinesServer.NbaGame
+      belongs_to :user, NbaLinesServer.User
       field :line, :integer
-      field :user_id, :integer
 
       # boolean represents if user choose above or below line
       field :bet, :boolean

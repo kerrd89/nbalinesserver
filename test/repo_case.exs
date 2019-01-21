@@ -16,6 +16,15 @@ defmodule NbaLinesServer.RepoCase do
             "away_team" => "bulls"
           })
         end
+
+        def create_default_user() do
+          User.Api.create_user(%{
+            "email" => "test@test.com",
+            "first_name" => "joe",
+            "last_name" => "bloe",
+            "password" => "temp1234"
+          })
+        end
       end
     end
   

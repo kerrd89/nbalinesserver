@@ -43,10 +43,11 @@ defmodule NbaLineTest do
 
     test "creates an nba_line when given valid params" do
       {:ok, nba_game} = create_default_nba_game()
+      {:ok, user} = create_default_user()
 
       params = %{
         "nba_game_id" => nba_game.id,
-        "user_id" => 1,
+        "user_id" => user.id,
         "line" => -5,
         "bet" => true
       }
@@ -60,10 +61,12 @@ defmodule NbaLineTest do
   describe "complete_nba_line/1" do
     test "home team underdog, bet for the home team, home team wins outright" do
       {:ok, nba_game} = create_default_nba_game()
+      {:ok, user} = create_default_user()
+
 
       params = %{
         "nba_game_id" => nba_game.id,
-        "user_id" => 1,
+        "user_id" => user.id,
         "line" => -5,
         "bet" => true
       }
@@ -79,10 +82,12 @@ defmodule NbaLineTest do
 
     test "home team underdog, bet against the home team, home team wins outright" do
       {:ok, nba_game} = create_default_nba_game()
+      {:ok, user} = create_default_user()
+
 
       params = %{
         "nba_game_id" => nba_game.id,
-        "user_id" => 1,
+        "user_id" => user.id,
         "line" => -5,
         "bet" => false
       }
@@ -98,10 +103,12 @@ defmodule NbaLineTest do
 
     test "home team underdog, bet for the home team, home team beats" do
       {:ok, nba_game} = create_default_nba_game()
+      {:ok, user} = create_default_user()
+
 
       params = %{
         "nba_game_id" => nba_game.id,
-        "user_id" => 1,
+        "user_id" => user.id,
         "line" => -5,
         "bet" => true
       }
@@ -117,10 +124,12 @@ defmodule NbaLineTest do
 
     test "home team underdog, bet for home team, home team lost to line" do
       {:ok, nba_game} = create_default_nba_game()
+      {:ok, user} = create_default_user()
+
 
       params = %{
         "nba_game_id" => nba_game.id,
-        "user_id" => 1,
+        "user_id" => user.id,
         "line" => -5,
         "bet" => false
       }
@@ -136,10 +145,12 @@ defmodule NbaLineTest do
 
     test "home team underdog, bet against home team, home team beat" do
       {:ok, nba_game} = create_default_nba_game()
+      {:ok, user} = create_default_user()
+
 
       params = %{
         "nba_game_id" => nba_game.id,
-        "user_id" => 1,
+        "user_id" => user.id,
         "line" => -5,
         "bet" => false
       }
@@ -155,10 +166,11 @@ defmodule NbaLineTest do
 
     test "home team underdog, bet against home team, home team lost to line" do
       {:ok, nba_game} = create_default_nba_game()
+      {:ok, user} = create_default_user()
 
       params = %{
         "nba_game_id" => nba_game.id,
-        "user_id" => 1,
+        "user_id" => user.id,
         "line" => -5,
         "bet" => false
       }
@@ -174,10 +186,11 @@ defmodule NbaLineTest do
 
     test "home team underdog, bet against home team, push" do
       {:ok, nba_game} = create_default_nba_game()
+      {:ok, user} = create_default_user()
 
       params = %{
         "nba_game_id" => nba_game.id,
-        "user_id" => 1,
+        "user_id" => user.id,
         "line" => -5,
         "bet" => false
       }
@@ -193,10 +206,11 @@ defmodule NbaLineTest do
 
     test "home team underdog, bet for home team, push" do
       {:ok, nba_game} = create_default_nba_game()
+      {:ok, user} = create_default_user()
 
       params = %{
         "nba_game_id" => nba_game.id,
-        "user_id" => 1,
+        "user_id" => user.id,
         "line" => -5,
         "bet" => true
       }
@@ -212,10 +226,11 @@ defmodule NbaLineTest do
     
     test "home team favorite, bet for the home team, home team loses outright" do
       {:ok, nba_game} = create_default_nba_game()
+      {:ok, user} = create_default_user()
 
       params = %{
         "nba_game_id" => nba_game.id,
-        "user_id" => 1,
+        "user_id" => user.id,
         "line" => 5,
         "bet" => true
       }
@@ -231,10 +246,11 @@ defmodule NbaLineTest do
 
     test "home team favorite, bet against the home team, home team loses outright" do
       {:ok, nba_game} = create_default_nba_game()
+      {:ok, user} = create_default_user()
 
       params = %{
         "nba_game_id" => nba_game.id,
-        "user_id" => 1,
+        "user_id" => user.id,
         "line" => 5,
         "bet" => false
       }
@@ -250,10 +266,11 @@ defmodule NbaLineTest do
 
     test "home team favorite, bet for the home team, home team beats" do
       {:ok, nba_game} = create_default_nba_game()
+      {:ok, user} = create_default_user()
 
       params = %{
         "nba_game_id" => nba_game.id,
-        "user_id" => 1,
+        "user_id" => user.id,
         "line" => 5,
         "bet" => true
       }
@@ -269,10 +286,11 @@ defmodule NbaLineTest do
 
     test "home team favorite, bet against the home team, home team beats" do
       {:ok, nba_game} = create_default_nba_game()
+      {:ok, user} = create_default_user()
 
       params = %{
         "nba_game_id" => nba_game.id,
-        "user_id" => 1,
+        "user_id" => user.id,
         "line" => 5,
         "bet" => false
       }
@@ -288,10 +306,11 @@ defmodule NbaLineTest do
 
     test "home team favorite, bet for home team, home team lost to line" do
       {:ok, nba_game} = create_default_nba_game()
+      {:ok, user} = create_default_user()
 
       params = %{
         "nba_game_id" => nba_game.id,
-        "user_id" => 1,
+        "user_id" => user.id,
         "line" => 5,
         "bet" => true
       }
@@ -307,10 +326,11 @@ defmodule NbaLineTest do
 
     test "home team favorite, bet against home team, home lost to line" do
       {:ok, nba_game} = create_default_nba_game()
+      {:ok, user} = create_default_user()
 
       params = %{
         "nba_game_id" => nba_game.id,
-        "user_id" => 1,
+        "user_id" => user.id,
         "line" => 5,
         "bet" => false
       }
@@ -326,10 +346,11 @@ defmodule NbaLineTest do
 
     test "home team favorite, bet against home team, push" do
       {:ok, nba_game} = create_default_nba_game()
+      {:ok, user} = create_default_user()
 
       params = %{
         "nba_game_id" => nba_game.id,
-        "user_id" => 1,
+        "user_id" => user.id,
         "line" => 5,
         "bet" => false
       }
@@ -345,10 +366,11 @@ defmodule NbaLineTest do
 
     test "home team favorite, bet for home team, push" do
       {:ok, nba_game} = create_default_nba_game()
+      {:ok, user} = create_default_user()
 
       params = %{
         "nba_game_id" => nba_game.id,
-        "user_id" => 1,
+        "user_id" => user.id,
         "line" => 5,
         "bet" => true
       }
