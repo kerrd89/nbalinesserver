@@ -25,7 +25,7 @@ defmodule NbaLinesServer.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger, :cowboy, :plug, :poison],
+      extra_applications: [:logger, :cowboy, :plug, :poison, :comeonin],
       mod: {NbaLinesServer.Application, []}
     ]
   end
@@ -39,6 +39,9 @@ defmodule NbaLinesServer.MixProject do
       {:poison, "~> 3.0"},
       {:ecto_sql, "~> 3.0"},
       {:postgrex, "~> 0.14.1"},
+      {:guardian, "1.2.1"},
+      {:guardian_db, "2.0.0"},
+      {:comeonin, "1.6.0"},
 
       # test dependencies
       {:coverex, "~> 1.5.0", only: :test}

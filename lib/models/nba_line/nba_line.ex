@@ -29,4 +29,11 @@ defmodule NbaLinesServer.NbaLine do
       |> foreign_key_constraint(:nba_game_id)
       |> validate_required(@create_bet_required_fields)
     end
+
+    @doc "changeset to complete a nba line record"
+    def complete_bet_changeset(model, params \\ :empty) do
+      model
+      |> cast(params, @complete_bet_required_fields)
+      |> validate_required(@complete_bet_required_fields)
+    end
 end

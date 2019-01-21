@@ -8,6 +8,14 @@ defmodule NbaLinesServer.RepoCase do
         import Ecto
         import Ecto.Query
         import NbaLinesServer.RepoCase
+
+        def create_default_nba_game() do
+          NbaGame.Api.create_nba_game(%{
+            "date" => Date.utc_today(),
+            "home_team" => "cavs",
+            "away_team" => "bulls"
+          })
+        end
       end
     end
   

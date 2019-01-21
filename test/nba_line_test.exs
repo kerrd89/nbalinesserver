@@ -9,11 +9,7 @@ defmodule NbaLineTest do
 
   describe "create_nba_line/1" do
     test "returns an error if missing params" do
-      {:ok, nba_game} = NbaGame.Api.create_nba_game(%{
-        "date" => Date.utc_today(),
-        "home_team" => "cavs",
-        "away_team" => "bulls"
-      })
+      {:ok, nba_game} = create_default_nba_game()
 
       {:error, message} = NbaLine.Api.create_nba_line(%{"nba_game_id" => nba_game.id})
 
@@ -46,11 +42,7 @@ defmodule NbaLineTest do
     end
 
     test "creates an nba_line when given valid params" do
-      {:ok, nba_game} = NbaGame.Api.create_nba_game(%{
-        "date" => Date.utc_today(),
-        "home_team" => "cavs",
-        "away_team" => "bulls"
-      })
+      {:ok, nba_game} = create_default_nba_game()
 
       params = %{
         "nba_game_id" => nba_game.id,
@@ -62,6 +54,312 @@ defmodule NbaLineTest do
       {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
 
       assert nba_line.nba_game_id == nba_game.id
+    end
+  end
+
+  describe "complete_nba_line/1" do
+    test "home team underdog, bet for the home team, home team wins outright" do
+      {:ok, nba_game} = create_default_nba_game()
+
+      params = %{
+        "nba_game_id" => nba_game.id,
+        "user_id" => 1,
+        "line" => -5,
+        "bet" => true
+      }
+
+      {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
+
+      # bet was true against the line of -5, so this result should be 1
+      result_params = %{"final_difference" => 14}
+
+      {:ok, result_nba_line} = NbaLine.Api.complete_nba_line(nba_line, result_params)
+      assert result_nba_line.result == 1
+    end
+
+    test "home team underdog, bet against the home team, home team wins outright" do
+      {:ok, nba_game} = create_default_nba_game()
+
+      params = %{
+        "nba_game_id" => nba_game.id,
+        "user_id" => 1,
+        "line" => -5,
+        "bet" => false
+      }
+
+      {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
+
+      # bet was true against the line of -5, so this result should be 1
+      result_params = %{"final_difference" => 14}
+
+      {:ok, result_nba_line} = NbaLine.Api.complete_nba_line(nba_line, result_params)
+      assert result_nba_line.result == 2
+    end
+
+    test "home team underdog, bet for the home team, home team beats" do
+      {:ok, nba_game} = create_default_nba_game()
+
+      params = %{
+        "nba_game_id" => nba_game.id,
+        "user_id" => 1,
+        "line" => -5,
+        "bet" => true
+      }
+
+      {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
+
+      # bet was true against the line of -5, so this result should be 1
+      result_params = %{"final_difference" => -4}
+
+      {:ok, result_nba_line} = NbaLine.Api.complete_nba_line(nba_line, result_params)
+      assert result_nba_line.result == 1
+    end
+
+    test "home team underdog, bet for home team, home team lost to line" do
+      {:ok, nba_game} = create_default_nba_game()
+
+      params = %{
+        "nba_game_id" => nba_game.id,
+        "user_id" => 1,
+        "line" => -5,
+        "bet" => false
+      }
+
+      {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
+
+      # bet was true against the line of -5, so this result should be 1
+      result_params = %{"final_difference" => -6}
+
+      {:ok, result_nba_line} = NbaLine.Api.complete_nba_line(nba_line, result_params)
+      assert result_nba_line.result == 2
+    end
+
+    test "home team underdog, bet against home team, home team beat" do
+      {:ok, nba_game} = create_default_nba_game()
+
+      params = %{
+        "nba_game_id" => nba_game.id,
+        "user_id" => 1,
+        "line" => -5,
+        "bet" => false
+      }
+
+      {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
+
+      # bet was false against the line of -5, so this result should be 2
+      result_params = %{"final_difference" => -4}
+
+      {:ok, result_nba_line} = NbaLine.Api.complete_nba_line(nba_line, result_params)
+      assert result_nba_line.result == 2
+    end
+
+    test "home team underdog, bet against home team, home team lost to line" do
+      {:ok, nba_game} = create_default_nba_game()
+
+      params = %{
+        "nba_game_id" => nba_game.id,
+        "user_id" => 1,
+        "line" => -5,
+        "bet" => false
+      }
+
+      {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
+
+      # bet was false against the line of -5, so this result should be 2
+      result_params = %{"final_difference" => -6}
+
+      {:ok, result_nba_line} = NbaLine.Api.complete_nba_line(nba_line, result_params)
+      assert result_nba_line.result == 2
+    end
+
+    test "home team underdog, bet against home team, push" do
+      {:ok, nba_game} = create_default_nba_game()
+
+      params = %{
+        "nba_game_id" => nba_game.id,
+        "user_id" => 1,
+        "line" => -5,
+        "bet" => false
+      }
+
+      {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
+
+      # bet was false against the line of -5, so this result should be 2
+      result_params = %{"final_difference" => -5}
+
+      {:ok, result_nba_line} = NbaLine.Api.complete_nba_line(nba_line, result_params)
+      assert result_nba_line.result == 0
+    end
+
+    test "home team underdog, bet for home team, push" do
+      {:ok, nba_game} = create_default_nba_game()
+
+      params = %{
+        "nba_game_id" => nba_game.id,
+        "user_id" => 1,
+        "line" => -5,
+        "bet" => true
+      }
+
+      {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
+
+      # bet was false against the line of -5, so this result should be 2
+      result_params = %{"final_difference" => -5}
+
+      {:ok, result_nba_line} = NbaLine.Api.complete_nba_line(nba_line, result_params)
+      assert result_nba_line.result == 0
+    end
+    
+    test "home team favorite, bet for the home team, home team loses outright" do
+      {:ok, nba_game} = create_default_nba_game()
+
+      params = %{
+        "nba_game_id" => nba_game.id,
+        "user_id" => 1,
+        "line" => 5,
+        "bet" => true
+      }
+
+      {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
+
+      # bet was true against the line of 5, so this result should be 2
+      result_params = %{"final_difference" => -14}
+
+      {:ok, result_nba_line} = NbaLine.Api.complete_nba_line(nba_line, result_params)
+      assert result_nba_line.result == 2
+    end
+
+    test "home team favorite, bet against the home team, home team loses outright" do
+      {:ok, nba_game} = create_default_nba_game()
+
+      params = %{
+        "nba_game_id" => nba_game.id,
+        "user_id" => 1,
+        "line" => 5,
+        "bet" => false
+      }
+
+      {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
+
+      # bet was false against the line of -5, so this result should be 1
+      result_params = %{"final_difference" => -14}
+
+      {:ok, result_nba_line} = NbaLine.Api.complete_nba_line(nba_line, result_params)
+      assert result_nba_line.result == 1
+    end
+
+    test "home team favorite, bet for the home team, home team beats" do
+      {:ok, nba_game} = create_default_nba_game()
+
+      params = %{
+        "nba_game_id" => nba_game.id,
+        "user_id" => 1,
+        "line" => 5,
+        "bet" => true
+      }
+
+      {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
+
+      # bet was true against the line of 5, so this result should be 1
+      result_params = %{"final_difference" => 6}
+
+      {:ok, result_nba_line} = NbaLine.Api.complete_nba_line(nba_line, result_params)
+      assert result_nba_line.result == 1
+    end
+
+    test "home team favorite, bet against the home team, home team beats" do
+      {:ok, nba_game} = create_default_nba_game()
+
+      params = %{
+        "nba_game_id" => nba_game.id,
+        "user_id" => 1,
+        "line" => 5,
+        "bet" => false
+      }
+
+      {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
+
+      # bet was false against the line of 5, so this result should be 2
+      result_params = %{"final_difference" => 6}
+
+      {:ok, result_nba_line} = NbaLine.Api.complete_nba_line(nba_line, result_params)
+      assert result_nba_line.result == 2
+    end
+
+    test "home team favorite, bet for home team, home team lost to line" do
+      {:ok, nba_game} = create_default_nba_game()
+
+      params = %{
+        "nba_game_id" => nba_game.id,
+        "user_id" => 1,
+        "line" => 5,
+        "bet" => true
+      }
+
+      {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
+
+      # bet was true against the line of 5, so this result should be 1
+      result_params = %{"final_difference" => 4}
+
+      {:ok, result_nba_line} = NbaLine.Api.complete_nba_line(nba_line, result_params)
+      assert result_nba_line.result == 2
+    end
+
+    test "home team favorite, bet against home team, home lost to line" do
+      {:ok, nba_game} = create_default_nba_game()
+
+      params = %{
+        "nba_game_id" => nba_game.id,
+        "user_id" => 1,
+        "line" => 5,
+        "bet" => false
+      }
+
+      {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
+
+      # bet was false against the line of 5, so this result should be 1
+      result_params = %{"final_difference" => 4}
+
+      {:ok, result_nba_line} = NbaLine.Api.complete_nba_line(nba_line, result_params)
+      assert result_nba_line.result == 1
+    end
+
+    test "home team favorite, bet against home team, push" do
+      {:ok, nba_game} = create_default_nba_game()
+
+      params = %{
+        "nba_game_id" => nba_game.id,
+        "user_id" => 1,
+        "line" => 5,
+        "bet" => false
+      }
+
+      {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
+
+      # bet was false against the line of 5, so this result should be 0
+      result_params = %{"final_difference" => 5}
+
+      {:ok, result_nba_line} = NbaLine.Api.complete_nba_line(nba_line, result_params)
+      assert result_nba_line.result == 0
+    end
+
+    test "home team favorite, bet for home team, push" do
+      {:ok, nba_game} = create_default_nba_game()
+
+      params = %{
+        "nba_game_id" => nba_game.id,
+        "user_id" => 1,
+        "line" => 5,
+        "bet" => true
+      }
+
+      {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
+
+      # bet was true against the line of 5, so this result should be 0
+      result_params = %{"final_difference" => 5}
+
+      {:ok, result_nba_line} = NbaLine.Api.complete_nba_line(nba_line, result_params)
+      assert result_nba_line.result == 0
     end
   end
 end
