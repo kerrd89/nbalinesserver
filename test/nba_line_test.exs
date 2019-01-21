@@ -384,4 +384,31 @@ defmodule NbaLineTest do
       assert result_nba_line.result == 0
     end
   end
+
+  describe "process_bets/1" do
+    test "returns the count of bets processed, 0 if none processed" do
+      {:ok, nba_game} = create_default_completed_nba_game()
+
+      # TODO: add statistics about each game to each game
+      {:ok, process_count} = NbaLine.Api.process_bets(nba_game)
+
+      assert process_count == 0
+    end
+
+    test "returns the count of bets processed and processes correctly" do
+      {:ok, nba_game} = create_default_completed_nba_game()
+      {:ok, user} = create_default_user()
+
+      {:ok, _nba_line} = create_default_nba_line(nba_game.id, user.id)
+
+      {:ok, process_count} = NbaLine.Api.process_bets(nba_game)
+
+      assert process_count == 1
+
+      NbaLine.Api.get_nba_lines() |> Enum.each(fn(nba_line) ->
+        # default line -5, default diff +2
+        assert nba_line.result == 1
+      end)
+    end
+  end
 end

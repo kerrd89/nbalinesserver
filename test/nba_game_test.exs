@@ -102,5 +102,25 @@ defmodule NbaGameTest do
       assert completed_nba_game.away_team == away_team
       assert completed_nba_game.away_team_score == away_team_score
     end
+
+    test "returns processes any associated nba_lines" do
+      {:ok, nba_game} = create_default_nba_game()
+      {:ok, user} = create_default_user()
+      {:ok, _nba_line} = create_default_nba_line(nba_game.id, user.id)
+
+      home_team_score = 102 
+      away_team_score = 100
+
+      complete_params = %{
+        "nba_game_id" => nba_game.id,
+        "home_team_score" => home_team_score,
+        "away_team_score" => away_team_score
+      }
+
+      {:ok, completed_nba_game} = NbaGame.Api.complete_nba_game(complete_params)
+
+      NbaLine.Api.get_lines_for_game(completed_nba_game.id)
+      |> Enum.each(fn(nba_line) -> assert nba_line.result end)
+    end
   end
 end

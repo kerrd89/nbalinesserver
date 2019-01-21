@@ -37,11 +37,13 @@ defmodule NbaGame.Api do
                         away_team_score: params["away_team_score"]
                         })
                         
-                        if nba_game_changeset.valid? do
-                            Repo.update(nba_game_changeset)
-                        else
-                            {:error, nba_game_changeset.errors}
-                        end
+                    if nba_game_changeset.valid? do
+                        {:ok, nba_game} = Repo.update(nba_game_changeset)
+
+                        NbaLines.Api.process_bets(nba_game)
+                    else
+                        {:error, nba_game_changeset.errors}
+                    end
                 _ -> {:error, "nba_game_id invalid"}
             end
         end

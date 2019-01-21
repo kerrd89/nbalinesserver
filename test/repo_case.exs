@@ -17,12 +17,30 @@ defmodule NbaLinesServer.RepoCase do
           })
         end
 
+        def create_default_completed_nba_game() do
+          {:ok, nba_game} = create_default_nba_game()
+
+          NbaLinesServer.NbaGame.complete_game_changeset(nba_game, %{
+            home_team_score: 102,
+            away_team_score: 100
+          }) |> Repo.update()
+        end
+
         def create_default_user() do
           User.Api.create_user(%{
             "email" => "test@test.com",
             "first_name" => "joe",
             "last_name" => "bloe",
             "password" => "temp1234"
+          })
+        end
+
+        def create_default_nba_line(nba_game_id, user_id) do
+          NbaLine.Api.create_nba_line(%{
+            "nba_game_id" => nba_game_id,
+            "user_id" => user_id,
+            "line" => -5,
+            "bet" => true
           })
         end
       end

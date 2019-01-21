@@ -2,6 +2,8 @@ defmodule NbaLine.Api do
   alias NbaLinesServer.Repo
   alias NbaLinesServer.NbaLine
 
+  import Ecto.Query, only: [from: 2]
+
   @doc "helper method to get all nba lines"
   @spec get_nba_lines() :: list()
   def get_nba_lines(), do: Repo.all(NbaLine)
@@ -9,6 +11,7 @@ defmodule NbaLine.Api do
   @doc "helper method to create a nba_line"
   @spec create_nba_line(params :: map()) :: {:ok, NbaLine} | {:error, list()}
   def create_nba_line(params) do
+    # NOTE: validate user has not already bet on this game before
     # changeset not validating key constraint until insert, cannot case changeset
     if not NbaGame.Api.is_game_id_valid?(params["nba_game_id"]) do
       {:error, [nba_game_id: {"invalid", [validation: :foreign]}]}
@@ -84,5 +87,27 @@ defmodule NbaLine.Api do
     else
       {:error, complete_bet_changeset.errors}
     end
+  end
+
+  @doc "helper method to process lines for a given game"
+  @spec process_bets(nba_game :: NbaLinesServer.NbaGame) :: {:ok, integer()} | {:error, String.t}
+  def process_bets(%NbaLinesServer.NbaGame{id: nba_game_id,
+    home_team_score: home_team_score,
+    away_team_score: away_team_score})
+  when not is_nil(home_team_score) and not is_nil(away_team_score) do
+    final_difference = home_team_score - away_team_score
+
+    nba_line_query = from nba_line in NbaLine,
+                     where: nba_line.nba_game_id == ^nba_game_id
+                     and is_nil(nba_line.result)
+
+    count = Repo.all(nba_line_query) |> Enum.reduce(0, fn(nba_line, acc) ->
+      case complete_nba_line(nba_line, %{"final_difference" => final_difference}) do
+        {:ok, _updated_nba_line} -> acc + 1
+        {:error, _error} -> acc
+      end
+    end)
+
+    {:ok, count}
   end
 end
