@@ -17,8 +17,6 @@ defmodule NbaLinesServer.Router do
         
         body = Poison.decode!(body)
         
-        IO.inspect(body)
-        
         send_resp(conn, 201, "created: #{get_in(body, ["message"])}")
     end
     
