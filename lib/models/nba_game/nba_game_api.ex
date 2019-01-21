@@ -26,23 +26,23 @@ defmodule NbaGame.Api do
     @spec complete_nba_game(params :: map()) :: {:ok, NbaLine} | {:error, list()}
     def complete_nba_game(params) do
         nba_game_id = Map.get(params, "nba_game_id", nil)
+
         if is_nil(nba_game_id) do
-            {:error, "nba_game_id not provided"}
+            {:error, "nba_game_id invalid"}
         else
             case Repo.get(NbaGame, nba_game_id) do
-                nil ->
-                    {:error, "nba_game #{nba_game_id} DNE"}
                 %NbaGame{} = game ->
                     nba_game_changeset = NbaGame.complete_game_changeset(game, %{
                         home_team_score: params["home_team_score"],
                         away_team_score: params["away_team_score"]
-                    })
-        
-                    if nba_game_changeset.valid? do
-                        Repo.update(nba_game_changeset)
-                    else
-                        {:error, nba_game_changeset.errors}
-                    end
+                        })
+                        
+                        if nba_game_changeset.valid? do
+                            Repo.update(nba_game_changeset)
+                        else
+                            {:error, nba_game_changeset.errors}
+                        end
+                _ -> {:error, "nba_game_id invalid"}
             end
         end
     end

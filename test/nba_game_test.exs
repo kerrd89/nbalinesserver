@@ -53,14 +53,14 @@ defmodule NbaGameTest do
 
       {:error, message} = NbaGame.Api.complete_nba_game(complete_params)
 
-      assert message == "nba_game_id not provided"
+      assert message == "nba_game_id invalid"
 
       # not passing valid nba_game_id
       complete_params = %{"nba_game_id" => 1000}
 
       {:error, message} = NbaGame.Api.complete_nba_game(complete_params)
 
-      assert message == "nba_game 1000 DNE"
+      assert message == "nba_game_id invalid"
 
       # not passing score
       complete_params = %{"nba_game_id" => nba_game.id}
