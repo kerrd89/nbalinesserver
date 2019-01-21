@@ -14,6 +14,7 @@ defmodule NbaLinesServer.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       elixirc_paths: elixirc_paths(Mix.env()),
+      compilers: [:phoenix, :gettext] ++ Mix.compilers,
       test_coverage: [
         tool: Coverex.Task,
         ignore_modules: @ignore_modules
@@ -25,7 +26,7 @@ defmodule NbaLinesServer.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger, :cowboy, :plug, :poison, :comeonin],
+      extra_applications: [:phoenix, :phoenix_pubsub, :logger, :gettext, :cowboy, :plug, :poison, :comeonin],
       mod: {NbaLinesServer.Application, []}
     ]
   end
@@ -33,6 +34,10 @@ defmodule NbaLinesServer.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:phoenix, "~> 1.4.0"},
+      {:phoenix_pubsub, "~> 1.1.1"},
+      {:phoenix_ecto, "4.0.0"},
+      {:phoenix_html, "2.13.1"},
       {:cowboy, "~> 2.6.0"},
       {:plug_cowboy, "~> 2.0.0"},
       {:plug, "~> 1.7"},
@@ -42,6 +47,7 @@ defmodule NbaLinesServer.MixProject do
       {:guardian, "1.2.1"},
       {:guardian_db, "2.0.0"},
       {:comeonin, "1.6.0"},
+      {:gettext, "0.16.0"},
 
       # test dependencies
       {:coverex, "~> 1.5.0", only: :test}

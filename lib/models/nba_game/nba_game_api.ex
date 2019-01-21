@@ -38,9 +38,11 @@ defmodule NbaGame.Api do
                         })
                         
                     if nba_game_changeset.valid? do
-                        {:ok, nba_game} = Repo.update(nba_game_changeset)
+                        {:ok, nba_game} = response = Repo.update(nba_game_changeset)
 
-                        NbaLines.Api.process_bets(nba_game)
+                        NbaLine.Api.process_bets(nba_game)
+
+                        response
                     else
                         {:error, nba_game_changeset.errors}
                     end

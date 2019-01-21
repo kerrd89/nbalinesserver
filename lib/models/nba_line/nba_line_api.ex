@@ -89,6 +89,16 @@ defmodule NbaLine.Api do
     end
   end
 
+  @doc "helper method to return unresolved lines for a given game"
+  @spec get_lines_for_game(nba_game_id :: integer()) :: list() 
+  def get_lines_for_game(nba_game_id) do
+    nba_line_query = from nba_line in NbaLine,
+                     where: nba_line.nba_game_id == ^nba_game_id
+                     and is_nil(nba_line.result)
+
+    Repo.all(nba_line_query)
+  end
+
   @doc "helper method to process lines for a given game"
   @spec process_bets(nba_game :: NbaLinesServer.NbaGame) :: {:ok, integer()} | {:error, String.t}
   def process_bets(%NbaLinesServer.NbaGame{id: nba_game_id,
@@ -97,11 +107,7 @@ defmodule NbaLine.Api do
   when not is_nil(home_team_score) and not is_nil(away_team_score) do
     final_difference = home_team_score - away_team_score
 
-    nba_line_query = from nba_line in NbaLine,
-                     where: nba_line.nba_game_id == ^nba_game_id
-                     and is_nil(nba_line.result)
-
-    count = Repo.all(nba_line_query) |> Enum.reduce(0, fn(nba_line, acc) ->
+    count = get_lines_for_game(nba_game_id) |> Enum.reduce(0, fn(nba_line, acc) ->
       case complete_nba_line(nba_line, %{"final_difference" => final_difference}) do
         {:ok, _updated_nba_line} -> acc + 1
         {:error, _error} -> acc
