@@ -35,7 +35,6 @@ defmodule NbaLinesServer.User do
       model
       |> cast(params, @required_fields ++ @optional_fields)
       |> validate_required(@required_fields)
-      |> unique_constraint(:email)
     end
   
     def registration_changeset(model, params) do
@@ -43,6 +42,7 @@ defmodule NbaLinesServer.User do
       |> changeset(params)
       |> cast(params, @required_fields ++ @optional_fields)
       |> validate_required(@required_fields)
+      |> unique_constraint(:email)
       |> validate_length(:password, min: 6, max: 100)
       |> put_pass_hash()
     end
