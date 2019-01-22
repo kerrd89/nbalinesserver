@@ -9,11 +9,11 @@ defmodule NbaLinesServer.RepoCase do
         import Ecto.Query
         import NbaLinesServer.RepoCase
 
-        def create_default_nba_game() do
+        def create_default_nba_game(params \\ %{}) do
           NbaGame.Api.create_nba_game(%{
-            "date" => Date.utc_today(),
-            "home_team" => "cavs",
-            "away_team" => "bulls"
+            "date" => Map.get(params, "date", Date.utc_today()),
+            "home_team" => Map.get(params, "home_team", "cavs"),
+            "away_team" => Map.get(params, "away_team", "bulls")
           })
         end
 

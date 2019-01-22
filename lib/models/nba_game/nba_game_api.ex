@@ -1,10 +1,28 @@
 defmodule NbaGame.Api do
     alias NbaLinesServer.Repo
     alias NbaLinesServer.NbaGame
+
+    import Ecto.Query, only: [from: 2]
   
     @doc "helper method to get all nba games for a certain date"
     @spec get_nba_games_by_date(date :: Date) :: list()
-    def get_nba_games_by_date(_date), do: Repo.all(NbaGame)
+    def get_nba_games_by_date(date) do
+        nba_game_query = from nba_game in NbaGame,
+                         where: nba_game.date == ^date
+ 
+        Repo.all(nba_game_query)
+    end
+
+    @doc "helper method to get date records for nba_games which have not been completed"
+    @spec get_uncompleted_nba_game_dates() :: list(Date)
+    def get_uncompleted_nba_game_dates() do
+        nba_game_date_query = from nba_game in NbaGame,
+                         where: is_nil(nba_game.home_team_score) and
+                         is_nil(nba_game.away_team_score),
+                         distinct: true,
+                         select: nba_game.date
+        Repo.all(nba_game_date_query)       
+    end
 
     @doc "helper method to get all nba games for a certain date"
     @spec get_nba_game_by_id(nba_game_id :: integer) :: NbaGame | nil
@@ -65,4 +83,51 @@ defmodule NbaGame.Api do
         not is_nil(Repo.get(NbaGame, nba_game_id))
     end
     def is_game_id_valid?(_), do: false
+
+    @doc """
+    helper method to generate new nba_games from api json response from data.nba.net
+    """
+    @spec handle_nba_games_by_date(date :: Date) :: {:ok, integer()} | {:error, Sring.t()}
+    def handle_nba_games_by_date(date) do
+        nba_games_for_today = get_nba_games_by_date(date)
+
+        if Enum.count(nba_games_for_today) > 0 do
+            {:ok, 0}
+        else
+            {year, month, day} = Date.to_erl(date)
+            long_month = if month < 10, do: "0#{month}", else: "#{month}"
+            long_day = if day < 10, do: "0#{day}", else: "#{day}"
+
+            url = "http://data.nba.net/10s/prod/v1/#{year}#{long_month}#{long_day}/scoreboard.json"
+
+            case HTTPoison.get(url) do
+                {:ok, %{status_code: 200, body: body}} ->
+                    nba_games = Poison.decode!(body) |> Map.get("games", [])
+
+                    games_created = Enum.reduce(nba_games, 0, fn(nba_game, acc) ->
+                        home_team = Map.get(nba_game, "hTeam", %{}) |> Map.get("triCode", nil)
+                        away_team = Map.get(nba_game, "vTeam", %{}) |> Map.get("triCode", nil)
+                        
+                        params = %{
+                            "date" => date,
+                            "home_team" => home_team,
+                            "away_team" => away_team
+                        }
+
+                        case create_nba_game(params) do
+                            {:ok, %NbaGame{}} -> acc + 1
+                            {:error, _error} -> acc
+                        end
+                    end)
+
+                    {:ok, games_created}
+                {:ok, %{status_code: 404}} ->
+                    # do something with a 404
+                    {:error, "404"}
+                {:error, %{reason: reason}} ->
+                    # do something with an error
+                    {:error, reason}
+            end
+        end
+    end
 end

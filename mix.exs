@@ -35,7 +35,8 @@ defmodule NbaLinesServer.MixProject do
         :plug,
         :poison,
         :comeonin,
-        :cors_plug
+        :cors_plug,
+        :httpoison
       ],
       mod: {NbaLinesServer.Application, []}
     ]
@@ -59,6 +60,7 @@ defmodule NbaLinesServer.MixProject do
       {:comeonin, "1.6.0"},
       {:gettext, "0.16.0"},
       {:cors_plug, "2.0.0"},
+      {:httpoison, "~> 1.4"},
 
       # test dependencies
       {:coverex, "~> 1.5.0", only: :test}

@@ -123,4 +123,25 @@ defmodule NbaGameTest do
       |> Enum.each(fn(nba_line) -> assert nba_line.result end)
     end
   end
+
+  describe "get_uncompleted_nba_game_dates/0" do
+    test "returns array of dates with uncompleted nba dates" do
+      create_default_nba_game()
+      create_default_nba_game(%{"home_team" => "cha", "away_team" => "sas"})
+
+      assert NbaGame.Api.get_uncompleted_nba_game_dates() == [Date.utc_today()]
+    end
+
+    test "returns array of multiple dates with uncompleted nba dates" do
+      today = Date.utc_today()
+      some_time_ago = Date.from_erl!({2019, 1, 16})
+      long_time_ago = Date.from_erl!({2018, 12, 12})
+
+      create_default_nba_game(%{"date" => some_time_ago})
+      create_default_nba_game(%{"date" => today})
+      create_default_nba_game(%{"date" => long_time_ago})
+
+      assert NbaGame.Api.get_uncompleted_nba_game_dates() == [long_time_ago, some_time_ago, today]
+    end
+  end
 end
