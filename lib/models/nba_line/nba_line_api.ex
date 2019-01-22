@@ -8,6 +8,16 @@ defmodule NbaLine.Api do
   @spec get_nba_lines() :: list()
   def get_nba_lines(), do: Repo.all(NbaLine)
 
+  @doc "helper method to get all nba lines"
+  @spec get_nba_lines_by_user_id(user_id :: integer()) :: list()
+  def get_nba_lines_by_user_id(user_id) do
+    nba_lines_query = from nba_line in NbaLine,
+                      where: nba_line.user_id == ^user_id
+
+    Repo.all(nba_lines_query)
+  end
+  def get_nba_lines_by_user_id(nil), do: []
+
   @doc "helper method to create a nba_line"
   @spec create_nba_line(params :: map()) :: {:ok, NbaLine} | {:error, list()}
   def create_nba_line(params) do
@@ -93,8 +103,8 @@ defmodule NbaLine.Api do
   @spec get_lines_for_game(nba_game_id :: integer()) :: list() 
   def get_lines_for_game(nba_game_id) do
     nba_line_query = from nba_line in NbaLine,
-                     where: nba_line.nba_game_id == ^nba_game_id
-                     and is_nil(nba_line.result)
+                    where: nba_line.nba_game_id == ^nba_game_id
+                    and is_nil(nba_line.result)
 
     Repo.all(nba_line_query)
   end

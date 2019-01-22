@@ -5,6 +5,10 @@ defmodule NbaGame.Api do
     @doc "helper method to get all nba games for a certain date"
     @spec get_nba_games_by_date(date :: Date) :: list()
     def get_nba_games_by_date(_date), do: Repo.all(NbaGame)
+
+    @doc "helper method to get all nba games for a certain date"
+    @spec get_nba_game_by_id(nba_game_id :: integer) :: NbaGame | nil
+    def get_nba_game_by_id(nba_game_id), do: Repo.get(NbaGame, nba_game_id)
   
     @doc "helper method to create an nba game"
     @spec create_nba_game(params :: map()) :: {:ok, NbaLine} | {:error, list()}
