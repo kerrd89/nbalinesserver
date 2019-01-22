@@ -26,7 +26,17 @@ defmodule NbaLinesServer.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:phoenix, :phoenix_pubsub, :logger, :gettext, :cowboy, :plug, :poison, :comeonin],
+      extra_applications: [
+        :phoenix,
+        :phoenix_pubsub,
+        :logger,
+        :gettext,
+        :cowboy,
+        :plug,
+        :poison,
+        :comeonin,
+        :cors_plug
+      ],
       mod: {NbaLinesServer.Application, []}
     ]
   end
@@ -48,6 +58,7 @@ defmodule NbaLinesServer.MixProject do
       {:guardian_db, "2.0.0"},
       {:comeonin, "1.6.0"},
       {:gettext, "0.16.0"},
+      {:cors_plug, "2.0.0"},
 
       # test dependencies
       {:coverex, "~> 1.5.0", only: :test}
@@ -56,7 +67,7 @@ defmodule NbaLinesServer.MixProject do
     ]
   end
 
-  defp elixirc_paths(:test), do: ["lib", "test/repo_case.exs"]
+  defp elixirc_paths(:test), do: ["lib", "test/repo_case.exs", "test/channel_case.exs"]
   defp elixirc_paths(_),     do: ["lib"]
 
   defp aliases do

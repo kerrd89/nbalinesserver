@@ -30,16 +30,12 @@ defmodule NbaLinesServer.UserSocket do
     # performing token verification on connect.
 
     def connect(%{"guardian_token" => token}, socket) do
-      Logger.debug "Weve got a guardian authed token passed: #{token}"
-      auth = Guardian.Phoenix.Socket.authenticate(socket, NbaLinesServer.Guardian,
-        token)
+      auth = Guardian.Phoenix.Socket.authenticate(socket,
+        NbaLinesServer.Guardian, token)
   
       case auth do
-        {:ok, auth_socket} ->
-          Logger.info("Valid user connected to user socket: #{inspect socket}")
-          {:ok, auth_socket}
-        _ ->
-          :error
+        {:ok, auth_socket} -> {:ok, auth_socket}
+        _ -> :error
       end
     end
   
