@@ -79,7 +79,7 @@ defmodule NbaLinesServer.MixProject do
     ]
   end
 
-  defp elixirc_paths(:test), do: ["lib", "test/repo_case.exs", "test/channel_case.exs", "test/factory.ex"]
+  defp elixirc_paths(:test), do: ["lib", "test/repo_case.exs", "test/channel_case.exs", "test/factory.ex", "test/conn_case.exs"]
   defp elixirc_paths(_),     do: ["lib"]
 
   defp aliases do

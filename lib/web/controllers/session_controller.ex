@@ -12,16 +12,16 @@ defmodule NbaLinesServer.SessionController do
     alias NbaLinesServer.Authentication
   
     @doc "Handle `POST` request to login with a JSON payload username/password"
-    def login(conn, %{"username" => username, "password" => password}) do  
-      Logger.info "Trying login = username: #{username} password: #{password}"
-      login_result = Authentication.api_login_by_username_and_pass(conn,
-        username, password, repo: Repo)
+    def login(conn, %{"email" => email, "password" => password}) do  
+      Logger.info "Trying login = email: #{email} password: #{password}"
+      login_result = Authentication.api_login_by_email_and_pass(conn,
+        email, password, repo: Repo)
       case login_result do
         {:ok, token} -> json(conn, %{token: token})
         {:error, _reason, conn} ->
           conn
           |> put_status(302)
-          |> json("Invalid username/password combination")
+          |> json("Invalid email/password combination")
       end
     end
   

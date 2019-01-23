@@ -3,6 +3,8 @@ defmodule NbaLinesServer.Router do
     # use Plug.Debugger
     # require Logger
     use NbaLinesServer.Web, :router
+
+    alias NbaLinesServer.SessionController
     
     pipeline :api do
         plug Plug.Logger
@@ -14,7 +16,7 @@ defmodule NbaLinesServer.Router do
     pipeline :api_auth do
         # Looks in the Authorization header for the token
         plug Guardian.Plug.Pipeline, module: NbaLinesServer.Guardian,
-                                 error_handler: NbaLinesServer.SessionController
+            error_handler: SessionController
     
         # Note - since we don't currently use a realm, we must set to :none
         plug Guardian.Plug.VerifyHeader, realm: :none
@@ -23,23 +25,8 @@ defmodule NbaLinesServer.Router do
         plug Guardian.Plug.EnsureAuthenticated
     end
   
-    # get "/hello" do
-    #     send_resp(conn, 200, "world")
-    # end
-
-    # # Basic example to handle POST requests wiht a JSON body
-    # post "/post" do
-    #     {:ok, body, conn} = read_body(conn)
-        
-    #     body = Poison.decode!(body)
-        
-    #     send_resp(conn, 201, "created: #{get_in(body, ["message"])}")
-    # end
-    
-    
-    # # "Default" route that will get called when no other route is matched
-    # match _ do
-    #     send_resp(conn, 404, "not found")
-    # end
+    post "/authenticate", SessionController, :create
+    post "/login", SessionController, :login
+    delete "/logout", SessionController, :logout
 end
   
