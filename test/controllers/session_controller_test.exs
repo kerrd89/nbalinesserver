@@ -3,8 +3,6 @@ defmodule NbaLinesServer.SessionControllerTest do
   import NbaLinesServer.Factory
 
   alias Comeonin.Bcrypt
-  alias NbaLinesServer.GuardianToken
-  alias NbaLinesServer.Repo
 
   setup do
     user = create(:user, session_count: 0, password: "password",
