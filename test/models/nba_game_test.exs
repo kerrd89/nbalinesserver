@@ -1,7 +1,14 @@
 defmodule NbaGameTest do
   use NbaLinesServer.RepoCase
 
+  use ExVCR.Mock
+
   import NbaLinesServer.Factory
+
+  setup do
+    ExVCR.Config.cassette_library_dir("test/fixture/vcr_cassettes")
+    :ok
+  end
 
   describe "get_nba_games_by_date/1" do
     test "returns an empty array if no nba_lines exist" do
@@ -128,22 +135,48 @@ defmodule NbaGameTest do
 
   describe "get_uncompleted_nba_game_dates/0" do
     test "returns array of dates with uncompleted nba dates" do
-      create(:nba_game)
-      create(:nba_game, %{home_team: "cha", away_team: "sas"})
+      {year, month, day} = Date.utc_today() |> Date.to_erl()
+      past_date = {year - 1, month, day} |> Date.from_erl!()
 
-      assert NbaGame.Api.get_uncompleted_nba_game_dates() == [Date.utc_today()]
+      create(:nba_game, %{date: past_date})
+      create(:nba_game, %{home_team: "CHA", away_team: "SAS", date: past_date})
+
+      assert NbaGame.Api.get_uncompleted_nba_game_dates() == [past_date]
+    end
+
+    test "should not return uncompleted dates in the future" do
+      {year, month, day} = Date.utc_today() |> Date.to_erl()
+      future_date = {year + 1, month, day} |> Date.from_erl!()
+
+      create(:nba_game, %{date: future_date})
+
+      assert NbaGame.Api.get_uncompleted_nba_game_dates() == []
     end
 
     test "returns array of multiple dates with uncompleted nba dates" do
-      today = Date.utc_today()
       some_time_ago = Date.from_erl!({2019, 1, 16})
       long_time_ago = Date.from_erl!({2018, 12, 12})
 
       create(:nba_game, %{date: some_time_ago})
-      create(:nba_game, %{date: today})
       create(:nba_game, %{date: long_time_ago})
 
-      assert NbaGame.Api.get_uncompleted_nba_game_dates() == [long_time_ago, some_time_ago, today]
+      assert NbaGame.Api.get_uncompleted_nba_game_dates() == [long_time_ago, some_time_ago]
+    end
+  end
+
+  describe "handle complete nba_games_by_date/1" do
+    test "returns a success tuple with the count of games completed" do
+      use_cassette "get_nba_games_jan_16" do
+        past_date = Date.from_erl!({2019, 1, 16})
+
+        {:ok, games_created} = NbaGame.Api.handle_create_nba_games_by_date(past_date)
+
+        assert games_created == 8
+
+        {:ok, games_completed} = NbaGame.Api.handle_complete_nba_games_by_date(past_date)
+
+        assert games_completed == 8
+      end
     end
   end
 end

@@ -14,9 +14,8 @@
 # install dependencies
 mix deps.get
 
-# create development db
-mix ecto.create
-mix ecto.migrate
+# create development db, creates, migrates, seeds
+mix ecto.setup
 
 # create test db
 MIX_ENV=test mix ecto.create

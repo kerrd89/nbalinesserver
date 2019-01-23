@@ -15,6 +15,12 @@ defmodule NbaLinesServer.MixProject do
       deps: deps(),
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers,
+      preferred_cli_env: [
+        vcr: :test,
+        "vcr.delete": :test,
+        "vcr.check": :test,
+        "vcr.show": :test
+      ],
       test_coverage: [
         tool: Coverex.Task,
         ignore_modules: @ignore_modules
@@ -73,9 +79,10 @@ defmodule NbaLinesServer.MixProject do
 
       # test dependencies
       {:coverex, "~> 1.5.0", only: :test},
-      {:ex_machina, "0.6.2", only: [:dev, :test]}
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+      {:ex_machina, "0.6.2", only: [:dev, :test]},
+      # Recording API Requests
+      {:exvcr, "~> 0.10", only: :test},
+      {:ibrowse, "~> 4.4", only: :test}
     ]
   end
 
@@ -84,7 +91,10 @@ defmodule NbaLinesServer.MixProject do
 
   defp aliases do
     [
-     test: ["ecto.create --quiet", "ecto.migrate", "test"],
+    test: ["ecto.create --quiet", "ecto.migrate", "test"],
+    test: ["ecto.create --quiet", "ecto.migrate", "test"],
+    "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+    "ecto.reset": ["ecto.drop", "ecto.setup"],
     ]
   end
 end

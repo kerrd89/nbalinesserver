@@ -16,12 +16,25 @@ defmodule NbaGame.Api do
     @doc "helper method to get date records for nba_games which have not been completed"
     @spec get_uncompleted_nba_game_dates() :: list(Date)
     def get_uncompleted_nba_game_dates() do
+        today = Date.utc_today()
+
         nba_game_date_query = from nba_game in NbaGame,
                          where: is_nil(nba_game.home_team_score) and
                          is_nil(nba_game.away_team_score),
+                         where: nba_game.date < ^today,
                          distinct: true,
                          order_by: nba_game.date,
                          select: nba_game.date
+        Repo.all(nba_game_date_query)       
+    end
+
+    @doc "helper method to get nba_games which have not been completed for a certain date"
+    @spec get_uncompleted_nba_games_by_date(date :: Date) :: list(NbaGame)
+    def get_uncompleted_nba_games_by_date(date) do
+        nba_game_date_query = from nba_game in NbaGame,
+                         where: is_nil(nba_game.home_team_score) and
+                         is_nil(nba_game.away_team_score) and
+                         nba_game.date == ^date
         Repo.all(nba_game_date_query)       
     end
 
@@ -58,7 +71,8 @@ defmodule NbaGame.Api do
                     nba_game_changeset = NbaGame.complete_game_changeset(game, %{
                         home_team_score: params["home_team_score"],
                         away_team_score: params["away_team_score"],
-                        completed: true
+                        completed: true,
+                        bet_count: 0
                     })
                         
                     if nba_game_changeset.valid? do
@@ -133,9 +147,56 @@ defmodule NbaGame.Api do
         end
     end
 
-    @doc "helper method to complete uncompleted games for a given date"
-    @spec process_nba_games_by_date(date :: Date) :: {:ok, integer()} | {:error, String.t()}
-    def process_nba_games_by_date(_date) do
-        {:ok, 0}
+    @doc """
+    helper method to completed new nba_games from api json response from data.nba.net
+    """
+    @spec handle_complete_nba_games_by_date(date :: Date) :: {:ok, integer()} | {:error, Sring.t()}
+    def handle_complete_nba_games_by_date(date) do
+        uncompleted_nba_games = get_uncompleted_nba_games_by_date(date)
+
+        unless Enum.count(uncompleted_nba_games) == 0 do
+            {year, month, day} = Date.to_erl(date)
+            long_month = if month < 10, do: "0#{month}", else: "#{month}"
+            long_day = if day < 10, do: "0#{day}", else: "#{day}"
+
+            url = "http://data.nba.net/10s/prod/v1/#{year}#{long_month}#{long_day}/scoreboard.json"
+
+            case HTTPoison.get(url) do
+                {:ok, %{status_code: 200, body: body}} ->
+                    nba_games = Poison.decode!(body) |> Map.get("games", [])
+
+                    games_completed = Enum.reduce(nba_games, 0, fn(nba_game, acc) ->
+                        home_team = Map.get(nba_game, "hTeam", %{}) |> Map.get("triCode", nil)
+                        away_team = Map.get(nba_game, "vTeam", %{}) |> Map.get("triCode", nil)
+                        home_team_score = Map.get(nba_game, "hTeam", %{}) |> Map.get("score", nil)
+                        away_team_score = Map.get(nba_game, "vTeam", %{}) |> Map.get("score", nil)
+
+                        # assumption at this date is that games are only for this day, only check for teams
+                        uncompleted_game = uncompleted_nba_games |> Enum.find(fn(search) ->
+                            search.home_team == home_team and search.away_team == away_team
+                        end)
+                        unless is_nil(uncompleted_game) do
+                            complete_params = %{
+                                "nba_game_id" => uncompleted_game.id,
+                                "home_team_score" => home_team_score,
+                                "away_team_score" => away_team_score
+                            }
+                    
+                            case complete_nba_game(complete_params) do
+                                {:ok, %NbaGame{}} -> acc + 1
+                                {:error, _error} -> acc
+                            end
+                        end
+                    end)
+
+                    {:ok, games_completed}
+                {:ok, %{status_code: 404}} ->
+                    # do something with a 404
+                    {:error, "404"}
+                {:error, %{reason: reason}} ->
+                    # do something with an error
+                    {:error, reason}
+            end
+        end
     end
 end
