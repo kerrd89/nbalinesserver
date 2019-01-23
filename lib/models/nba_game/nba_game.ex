@@ -2,7 +2,7 @@ defmodule NbaLinesServer.NbaGame do
     use NbaLinesServer.Web, :model
   
     @create_game_required_fields [:date, :home_team, :away_team]
-    @complete_game_required_fields [:home_team_score, :away_team_score]
+    @complete_game_required_fields [:home_team_score, :away_team_score, :completed]
   
     schema "nba_games" do
         field :date, :date
@@ -10,6 +10,9 @@ defmodule NbaLinesServer.NbaGame do
         field :home_team_score, :integer
         field :away_team, :string
         field :away_team_score, :integer
+        field :completed, :boolean, default: false
+        field :bet_count, :integer
+
         has_many :nba_lines, NbaLinesServer.NbaLine
 
         timestamps()

@@ -1,6 +1,8 @@
 defmodule NbaLineTest do
   use NbaLinesServer.RepoCase
 
+  import NbaLinesServer.Factory
+
   describe "get_nba_lines/0" do
     test "returns an empty array if no nba_lines exist" do
       assert NbaLine.Api.get_nba_lines() == []
@@ -9,7 +11,7 @@ defmodule NbaLineTest do
 
   describe "create_nba_line/1" do
     test "returns an error if missing params" do
-      {:ok, nba_game} = create_default_nba_game()
+      nba_game = create(:nba_game)
 
       {:error, message} = NbaLine.Api.create_nba_line(%{"nba_game_id" => nba_game.id})
 
@@ -42,8 +44,8 @@ defmodule NbaLineTest do
     end
 
     test "creates an nba_line when given valid params" do
-      {:ok, nba_game} = create_default_nba_game()
-      {:ok, user} = create_default_user()
+      nba_game = create(:nba_game)
+      user = create(:user)
 
       params = %{
         "nba_game_id" => nba_game.id,
@@ -60,8 +62,8 @@ defmodule NbaLineTest do
 
   describe "complete_nba_line/1" do
     test "home team underdog, bet for the home team, home team wins outright" do
-      {:ok, nba_game} = create_default_nba_game()
-      {:ok, user} = create_default_user()
+      nba_game = create(:nba_game)
+      user = create(:user)
 
 
       params = %{
@@ -81,8 +83,8 @@ defmodule NbaLineTest do
     end
 
     test "home team underdog, bet against the home team, home team wins outright" do
-      {:ok, nba_game} = create_default_nba_game()
-      {:ok, user} = create_default_user()
+      nba_game = create(:nba_game)
+      user = create(:user)
 
 
       params = %{
@@ -102,8 +104,8 @@ defmodule NbaLineTest do
     end
 
     test "home team underdog, bet for the home team, home team beats" do
-      {:ok, nba_game} = create_default_nba_game()
-      {:ok, user} = create_default_user()
+      nba_game = create(:nba_game)
+      user = create(:user)
 
 
       params = %{
@@ -123,8 +125,8 @@ defmodule NbaLineTest do
     end
 
     test "home team underdog, bet for home team, home team lost to line" do
-      {:ok, nba_game} = create_default_nba_game()
-      {:ok, user} = create_default_user()
+      nba_game = create(:nba_game)
+      user = create(:user)
 
 
       params = %{
@@ -144,8 +146,8 @@ defmodule NbaLineTest do
     end
 
     test "home team underdog, bet against home team, home team beat" do
-      {:ok, nba_game} = create_default_nba_game()
-      {:ok, user} = create_default_user()
+      nba_game = create(:nba_game)
+      user = create(:user)
 
 
       params = %{
@@ -165,8 +167,8 @@ defmodule NbaLineTest do
     end
 
     test "home team underdog, bet against home team, home team lost to line" do
-      {:ok, nba_game} = create_default_nba_game()
-      {:ok, user} = create_default_user()
+      nba_game = create(:nba_game)
+      user = create(:user)
 
       params = %{
         "nba_game_id" => nba_game.id,
@@ -185,8 +187,8 @@ defmodule NbaLineTest do
     end
 
     test "home team underdog, bet against home team, push" do
-      {:ok, nba_game} = create_default_nba_game()
-      {:ok, user} = create_default_user()
+      nba_game = create(:nba_game)
+      user = create(:user)
 
       params = %{
         "nba_game_id" => nba_game.id,
@@ -205,8 +207,8 @@ defmodule NbaLineTest do
     end
 
     test "home team underdog, bet for home team, push" do
-      {:ok, nba_game} = create_default_nba_game()
-      {:ok, user} = create_default_user()
+      nba_game = create(:nba_game)
+      user = create(:user)
 
       params = %{
         "nba_game_id" => nba_game.id,
@@ -225,8 +227,8 @@ defmodule NbaLineTest do
     end
     
     test "home team favorite, bet for the home team, home team loses outright" do
-      {:ok, nba_game} = create_default_nba_game()
-      {:ok, user} = create_default_user()
+      nba_game = create(:nba_game)
+      user = create(:user)
 
       params = %{
         "nba_game_id" => nba_game.id,
@@ -245,8 +247,8 @@ defmodule NbaLineTest do
     end
 
     test "home team favorite, bet against the home team, home team loses outright" do
-      {:ok, nba_game} = create_default_nba_game()
-      {:ok, user} = create_default_user()
+      nba_game = create(:nba_game)
+      user = create(:user)
 
       params = %{
         "nba_game_id" => nba_game.id,
@@ -265,8 +267,8 @@ defmodule NbaLineTest do
     end
 
     test "home team favorite, bet for the home team, home team beats" do
-      {:ok, nba_game} = create_default_nba_game()
-      {:ok, user} = create_default_user()
+      nba_game = create(:nba_game)
+      user = create(:user)
 
       params = %{
         "nba_game_id" => nba_game.id,
@@ -285,8 +287,8 @@ defmodule NbaLineTest do
     end
 
     test "home team favorite, bet against the home team, home team beats" do
-      {:ok, nba_game} = create_default_nba_game()
-      {:ok, user} = create_default_user()
+      nba_game = create(:nba_game)
+      user = create(:user)
 
       params = %{
         "nba_game_id" => nba_game.id,
@@ -305,8 +307,8 @@ defmodule NbaLineTest do
     end
 
     test "home team favorite, bet for home team, home team lost to line" do
-      {:ok, nba_game} = create_default_nba_game()
-      {:ok, user} = create_default_user()
+      nba_game = create(:nba_game)
+      user = create(:user)
 
       params = %{
         "nba_game_id" => nba_game.id,
@@ -325,8 +327,8 @@ defmodule NbaLineTest do
     end
 
     test "home team favorite, bet against home team, home lost to line" do
-      {:ok, nba_game} = create_default_nba_game()
-      {:ok, user} = create_default_user()
+      nba_game = create(:nba_game)
+      user = create(:user)
 
       params = %{
         "nba_game_id" => nba_game.id,
@@ -345,8 +347,8 @@ defmodule NbaLineTest do
     end
 
     test "home team favorite, bet against home team, push" do
-      {:ok, nba_game} = create_default_nba_game()
-      {:ok, user} = create_default_user()
+      nba_game = create(:nba_game)
+      user = create(:user)
 
       params = %{
         "nba_game_id" => nba_game.id,
@@ -365,8 +367,8 @@ defmodule NbaLineTest do
     end
 
     test "home team favorite, bet for home team, push" do
-      {:ok, nba_game} = create_default_nba_game()
-      {:ok, user} = create_default_user()
+      nba_game = create(:nba_game)
+      user = create(:user)
 
       params = %{
         "nba_game_id" => nba_game.id,
@@ -387,7 +389,7 @@ defmodule NbaLineTest do
 
   describe "process_bets/1" do
     test "returns the count of bets processed, 0 if none processed" do
-      {:ok, nba_game} = create_default_completed_nba_game()
+      nba_game = create(:completed_nba_game)
 
       # TODO: add statistics about each game to each game
       {:ok, process_count} = NbaLine.Api.process_bets(nba_game)
@@ -396,10 +398,9 @@ defmodule NbaLineTest do
     end
 
     test "returns the count of bets processed and processes correctly" do
-      {:ok, nba_game} = create_default_completed_nba_game()
-      {:ok, user} = create_default_user()
-
-      {:ok, _nba_line} = create_default_nba_line(nba_game.id, user.id)
+      nba_game = create(:completed_nba_game)
+      user = create(:user)
+      _nba_line = create(:nba_line, %{nba_game: nba_game, user: user})
 
       {:ok, process_count} = NbaLine.Api.process_bets(nba_game)
 

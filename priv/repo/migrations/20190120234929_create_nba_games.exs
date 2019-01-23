@@ -8,6 +8,8 @@ defmodule Cart.Repo.Migrations.CreateNbaGames do
         add :home_team_score, :integer
         add :away_team, :string
         add :away_team_score, :integer
+        add :completed, :boolean
+        add :bet_count, :integer
   
         timestamps()
       end

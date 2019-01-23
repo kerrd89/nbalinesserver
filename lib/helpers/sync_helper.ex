@@ -12,13 +12,13 @@ defmodule NbaLinesServer.SyncHelper do
         # create games for today
         date_today = Date.utc_today()
 
-        {:ok, games_created} = NbaGame.Api.handle_nba_games_by_date(date_today)
+        {:ok, games_created} = NbaGame.Api.handle_create_nba_games_by_date(date_today)
 
         dates_to_be_processed = NbaGame.Api.get_uncompleted_nba_game_dates()
 
         games_processed = Enum.reduce(dates_to_be_processed, 0, fn(date, acc) ->
             case NbaGame.Api.process_nba_games_by_date(date) do
-                {:ok, nba_game} -> acc + 1
+                {:ok, count} -> acc + count
                 {:error, _error} -> acc
             end
         end)

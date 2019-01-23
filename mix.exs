@@ -26,21 +26,30 @@ defmodule NbaLinesServer.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [
-        :phoenix,
-        :phoenix_pubsub,
-        :logger,
-        :gettext,
-        :cowboy,
-        :plug,
-        :poison,
-        :comeonin,
-        :cors_plug,
-        :httpoison
-      ],
+      extra_applications: applications(Mix.env),
       mod: {NbaLinesServer.Application, []}
     ]
   end
+
+  def applications(env) when env in [:test] do
+    applications(:default) ++ [:ex_machina]
+  end
+
+  def applications(_) do
+    [
+      :phoenix,
+      :phoenix_pubsub,
+      :logger,
+      :gettext,
+      :cowboy,
+      :plug,
+      :poison,
+      :comeonin,
+      :cors_plug,
+      :httpoison
+    ]
+  end
+
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
@@ -63,13 +72,14 @@ defmodule NbaLinesServer.MixProject do
       {:httpoison, "~> 1.4"},
 
       # test dependencies
-      {:coverex, "~> 1.5.0", only: :test}
+      {:coverex, "~> 1.5.0", only: :test},
+      {:ex_machina, "0.6.2", only: [:dev, :test]}
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
   end
 
-  defp elixirc_paths(:test), do: ["lib", "test/repo_case.exs", "test/channel_case.exs"]
+  defp elixirc_paths(:test), do: ["lib", "test/repo_case.exs", "test/channel_case.exs", "test/factory.ex"]
   defp elixirc_paths(_),     do: ["lib"]
 
   defp aliases do

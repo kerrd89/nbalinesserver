@@ -20,6 +20,7 @@ defmodule NbaGame.Api do
                          where: is_nil(nba_game.home_team_score) and
                          is_nil(nba_game.away_team_score),
                          distinct: true,
+                         order_by: nba_game.date,
                          select: nba_game.date
         Repo.all(nba_game_date_query)       
     end
@@ -56,8 +57,9 @@ defmodule NbaGame.Api do
                 %NbaGame{} = game ->
                     nba_game_changeset = NbaGame.complete_game_changeset(game, %{
                         home_team_score: params["home_team_score"],
-                        away_team_score: params["away_team_score"]
-                        })
+                        away_team_score: params["away_team_score"],
+                        completed: true
+                    })
                         
                     if nba_game_changeset.valid? do
                         {:ok, nba_game} = response = Repo.update(nba_game_changeset)
@@ -87,8 +89,8 @@ defmodule NbaGame.Api do
     @doc """
     helper method to generate new nba_games from api json response from data.nba.net
     """
-    @spec handle_nba_games_by_date(date :: Date) :: {:ok, integer()} | {:error, Sring.t()}
-    def handle_nba_games_by_date(date) do
+    @spec handle_create_nba_games_by_date(date :: Date) :: {:ok, integer()} | {:error, Sring.t()}
+    def handle_create_nba_games_by_date(date) do
         nba_games_for_today = get_nba_games_by_date(date)
 
         if Enum.count(nba_games_for_today) > 0 do
@@ -129,5 +131,11 @@ defmodule NbaGame.Api do
                     {:error, reason}
             end
         end
+    end
+
+    @doc "helper method to complete uncompleted games for a given date"
+    @spec process_nba_games_by_date(date :: Date) :: {:ok, integer()} | {:error, String.t()}
+    def process_nba_games_by_date(_date) do
+        {:ok, 0}
     end
 end

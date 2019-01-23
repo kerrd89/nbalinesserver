@@ -1,6 +1,8 @@
 defmodule NbaGameTest do
   use NbaLinesServer.RepoCase
 
+  import NbaLinesServer.Factory
+
   describe "get_nba_games_by_date/1" do
     test "returns an empty array if no nba_lines exist" do
       today = Date.utc_today()
@@ -91,7 +93,7 @@ defmodule NbaGameTest do
       complete_params = %{
         "nba_game_id" => nba_game.id,
         "home_team_score" => home_team_score,
-        "away_team_score" => away_team_score
+        "away_team_score" => away_team_score,
       }
 
       {:ok, completed_nba_game} = NbaGame.Api.complete_nba_game(complete_params)
@@ -104,9 +106,9 @@ defmodule NbaGameTest do
     end
 
     test "returns processes any associated nba_lines" do
-      {:ok, nba_game} = create_default_nba_game()
-      {:ok, user} = create_default_user()
-      {:ok, _nba_line} = create_default_nba_line(nba_game.id, user.id)
+      nba_game = create(:nba_game)
+      user = create(:user)
+      _nba_line = create(:nba_line, %{nba_game: nba_game, user: user})
 
       home_team_score = 102 
       away_team_score = 100
@@ -126,8 +128,8 @@ defmodule NbaGameTest do
 
   describe "get_uncompleted_nba_game_dates/0" do
     test "returns array of dates with uncompleted nba dates" do
-      create_default_nba_game()
-      create_default_nba_game(%{"home_team" => "cha", "away_team" => "sas"})
+      create(:nba_game)
+      create(:nba_game, %{home_team: "cha", away_team: "sas"})
 
       assert NbaGame.Api.get_uncompleted_nba_game_dates() == [Date.utc_today()]
     end
@@ -137,9 +139,9 @@ defmodule NbaGameTest do
       some_time_ago = Date.from_erl!({2019, 1, 16})
       long_time_ago = Date.from_erl!({2018, 12, 12})
 
-      create_default_nba_game(%{"date" => some_time_ago})
-      create_default_nba_game(%{"date" => today})
-      create_default_nba_game(%{"date" => long_time_ago})
+      create(:nba_game, %{date: some_time_ago})
+      create(:nba_game, %{date: today})
+      create(:nba_game, %{date: long_time_ago})
 
       assert NbaGame.Api.get_uncompleted_nba_game_dates() == [long_time_ago, some_time_ago, today]
     end

@@ -1,9 +1,11 @@
 defmodule UserTest do
   use NbaLinesServer.RepoCase
 
+  import NbaLinesServer.Factory
+
   describe "get_user_by_id/1" do
     test "returns a user if one exists" do
-      {:ok, user} = create_default_user()
+      user = create(:user)
 
       db_user = User.Api.get_user_by_id(user.id) 
 
@@ -72,7 +74,7 @@ defmodule UserTest do
     end
 
     test "enforces unique requirement on emails" do
-      {:ok, user} = create_default_user()
+      user = create(:user)
 
       {:error, error} = User.Api.create_user(%{
         "email" => user.email,
