@@ -34,7 +34,7 @@ defmodule NbaLinesServer.ConnCase do
             |> bypass_through(NbaLinesServer.Router, [:browser])
             |> get("/")
             |> NbaLinesServer.Guardian.Plug.sign_in(user)
-            |> send_resp(200, "Flush the session yo")
+            |> send_resp(200, "session flushed")
             |> recycle()
         end
   

@@ -48,6 +48,8 @@ defmodule NbaLinesServer.Web do
         import Ecto
         import Ecto.Query, only: [from: 1, from: 2]
         import NbaLinesServer.Gettext
+
+        import NbaLinesServer.Guardian.Plug, only: [current_resource: 1]
   
         @doc "Handle an unauthenticated request"
         @spec join(room :: binary, params :: %{}, socket :: Phoenix.Socket.t)

@@ -175,6 +175,7 @@ defmodule NbaGameTest do
         {:ok, games_created} = NbaGame.Api.handle_create_nba_games_by_date(past_date)
 
         assert games_created == 8
+        assert Enum.count(NbaGame.Api.get_uncompleted_nba_games_by_date(past_date)) == 8
 
         {:ok, games_completed} = NbaGame.Api.handle_update_nba_games_by_date(past_date)
 

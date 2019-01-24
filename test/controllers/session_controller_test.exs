@@ -28,5 +28,9 @@ defmodule NbaLinesServer.SessionControllerTest do
     |> post(session_path(build_conn(), :login), %{email: user.email, password: user.password})
 
     assert json_response(conn, 200)
+
+    payload = conn.resp_body |> Poison.decode!
+
+    refute is_nil(payload["token"])
   end
 end

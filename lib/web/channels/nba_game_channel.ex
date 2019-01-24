@@ -7,13 +7,14 @@ defmodule NbaLinesServer.NbaGameChannel do
   
     @doc "Join the nba_games channel"
     def join("nba_games", %{"guardian_token" => token}, socket) do
-        with {:ok, user_id} <- verify_token(token) do
+        with {:ok, _} <- verify_token(token) do
             nba_games = Date.utc_today()
-            |> NbaGame.Api.get_nba_games_by_date()
+                |> NbaGame.Api.get_nba_games_by_date()
 
             {:ok, %{nba_games: nba_games}, socket}
         else
-            {:error, _} = resp -> resp
+            {:error, _} = resp ->
+                resp
         end
     end
   
@@ -26,7 +27,11 @@ defmodule NbaLinesServer.NbaGameChannel do
     @max_age 86400
 
     def verify_token(token) do
-        NbaLinesServer.Endpoint
-        |> Phoenix.Token.verify(@salt, token, max_age: @max_age)
+        case NbaLinesServer.Guardian.decode_and_verify(token) do
+            {:ok, claims} ->
+                {:ok, "valid_token"}
+            {:error, _} = resp ->
+                {:error, "invalid_token"}
+        end
     end
 end

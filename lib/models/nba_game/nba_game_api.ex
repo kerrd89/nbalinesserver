@@ -31,8 +31,7 @@ defmodule NbaGame.Api do
     @spec get_uncompleted_nba_games_by_date(date :: Date) :: list(NbaGame)
     def get_uncompleted_nba_games_by_date(date) do
         nba_game_date_query = from nba_game in NbaGame,
-                         where: is_nil(nba_game.home_team_score) and
-                         is_nil(nba_game.away_team_score) and
+                         where: nba_game.completed == false and
                          nba_game.date == ^date
         Repo.all(nba_game_date_query)       
     end
@@ -120,6 +119,7 @@ defmodule NbaGame.Api do
     def handle_create_nba_games_by_date(date) do
         nba_games_for_today = get_nba_games_by_date(date)
 
+        # if there are already games today, do nothing
         if Enum.count(nba_games_for_today) > 0 do
             {:ok, 0}
         else
@@ -167,7 +167,10 @@ defmodule NbaGame.Api do
     def handle_update_nba_games_by_date(date) do
         uncompleted_nba_games = get_uncompleted_nba_games_by_date(date)
 
-        unless Enum.count(uncompleted_nba_games) == 0 do
+        # if there are no uncompleted nba_games, do nothing
+        if Enum.count(uncompleted_nba_games) <= 0 do
+            {:ok, 0}
+        else
             {year, month, day} = Date.to_erl(date)
             long_month = if month < 10, do: "0#{month}", else: "#{month}"
             long_day = if day < 10, do: "0#{day}", else: "#{day}"
@@ -183,18 +186,21 @@ defmodule NbaGame.Api do
                         away_team = Map.get(nba_game, "vTeam", %{}) |> Map.get("triCode", nil)
                         home_team_score = Map.get(nba_game, "hTeam", %{}) |> Map.get("score", nil)
                         away_team_score = Map.get(nba_game, "vTeam", %{}) |> Map.get("score", nil)
+                        status_num = Map.get(nba_game, "statusNum", 1)
 
                         # assumption at this date is that games are only for this day, only check for teams
                         uncompleted_game = uncompleted_nba_games |> Enum.find(fn(search) ->
                             search.home_team == home_team and search.away_team == away_team
                         end)
+
                         unless is_nil(uncompleted_game) do
                             complete_params = %{
                                 "nba_game_id" => uncompleted_game.id,
                                 "home_team_score" => home_team_score,
-                                "away_team_score" => away_team_score
+                                "away_team_score" => away_team_score,
+                                "is_finished?" => status_num == 3
                             }
-                    
+
                             case update_nba_game(complete_params) do
                                 {:ok, %NbaGame{}} -> acc + 1
                                 {:error, _error} -> acc
