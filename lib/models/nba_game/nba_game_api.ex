@@ -19,9 +19,8 @@ defmodule NbaGame.Api do
         today = Date.utc_today()
 
         nba_game_date_query = from nba_game in NbaGame,
-                         where: is_nil(nba_game.home_team_score) and
-                         is_nil(nba_game.away_team_score),
-                         where: nba_game.date < ^today,
+                         where: nba_game.completed == false and
+                                nba_game.date < ^today,
                          distinct: true,
                          order_by: nba_game.date,
                          select: nba_game.date

@@ -1,6 +1,6 @@
 defmodule NbaLinesServer.Plug.ApiAuthorizationPlug do
+    @behaviour Plug
     import Plug.Conn
-  
     import Phoenix.Controller
     import Guardian.Plug, only: [current_resource: 1]
     

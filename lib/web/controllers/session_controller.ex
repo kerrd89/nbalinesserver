@@ -9,12 +9,12 @@ defmodule NbaLinesServer.SessionController do
     require Logger
   
     use NbaLinesServer.Web, :controller
-    alias NbaLinesServer.Authentication
+    alias NbaLinesServer.AuthenticationController
   
     @doc "Handle `POST` request to login with a JSON payload username/password"
     def login(conn, %{"email" => email, "password" => password}) do  
-      Logger.info "Trying login = email: #{email} password: #{password}"
-      login_result = Authentication.api_login_by_email_and_pass(conn, email, password, [])
+      login_result = AuthenticationController.api_login_by_email_and_pass(conn, email, password, [])
+
       case login_result do
         {:ok, token} -> json(conn, %{token: token})
         {:error, _reason, conn} ->
@@ -27,7 +27,7 @@ defmodule NbaLinesServer.SessionController do
     @doc "Expire the users session and token"
     def logout(conn, %{"id" => _id}) do
       conn
-      |> Authentication.logout()
+      |> AuthenticationController.logout()
       |> json(%{"result" => %{
           "message" => "logged_out"
         }})
@@ -38,6 +38,6 @@ defmodule NbaLinesServer.SessionController do
       Logger.info("User accessing unauthorized app - #{inspect type}, #{inspect reason}")
       conn
       |> put_status(302)
-      |> json(%{status: false, message: "You are not authenticated"})
+      |> json("You are not authenticated")
     end
   end

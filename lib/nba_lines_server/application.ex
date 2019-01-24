@@ -5,15 +5,13 @@ defmodule NbaLinesServer.Application do
 
   use Application
 
-  alias NbaLinesServer.Endpoint
-
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
     # List all child processes to be supervised
     children = [
       # Start the endpoint when the application starts
-      supervisor(Endpoint, []),
+      supervisor(NbaLinesServer.Endpoint, []),
       # Plug.Adapters.Cowboy.child_spec(scheme: :http, plug: NbaLinesServer.Router, options: [port: 8085]),
       supervisor(NbaLinesServer.Repo, []),
       worker(NbaLinesServer.QuantumScheduler, []),

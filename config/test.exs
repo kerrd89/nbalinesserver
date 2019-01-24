@@ -7,4 +7,6 @@ config :nba_lines_server, NbaLinesServer.Repo,
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
 
+config :quantum, cron: []
+
 config :logger, level: :error

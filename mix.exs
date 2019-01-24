@@ -80,6 +80,8 @@ defmodule NbaLinesServer.MixProject do
       {:httpoison, "~> 1.4"},
       {:quantum, "~> 2.3"},
       {:timex, "~> 3.0"},
+      # json parser
+      {:jason, "~> 1.0"},
 
       # test dependencies
       {:coverex, "~> 1.5.0", only: :test},
