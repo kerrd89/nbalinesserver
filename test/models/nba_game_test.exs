@@ -43,7 +43,7 @@ defmodule NbaGameTest do
     end
   end
 
-  describe "complete_nba_game/1" do
+  describe "update_nba_game/1" do
     test "returns an error if missing params" do
       today = Date.utc_today()
       home_team = "cavs"
@@ -60,21 +60,21 @@ defmodule NbaGameTest do
       # not passing required nba_game_id
       complete_params = %{}
 
-      {:error, message} = NbaGame.Api.complete_nba_game(complete_params)
+      {:error, message} = NbaGame.Api.update_nba_game(complete_params)
 
       assert message == "nba_game_id invalid"
 
       # not passing valid nba_game_id
       complete_params = %{"nba_game_id" => 1000}
 
-      {:error, message} = NbaGame.Api.complete_nba_game(complete_params)
+      {:error, message} = NbaGame.Api.update_nba_game(complete_params)
 
       assert message == "nba_game_id invalid"
 
       # not passing score
       complete_params = %{"nba_game_id" => nba_game.id}
 
-      {:error, message} = NbaGame.Api.complete_nba_game(complete_params)
+      {:error, message} = NbaGame.Api.update_nba_game(complete_params)
 
       assert message == [
         home_team_score: {"can't be blank", [validation: :required]},
@@ -103,7 +103,7 @@ defmodule NbaGameTest do
         "away_team_score" => away_team_score,
       }
 
-      {:ok, completed_nba_game} = NbaGame.Api.complete_nba_game(complete_params)
+      {:ok, completed_nba_game} = NbaGame.Api.update_nba_game(complete_params)
 
       assert completed_nba_game.date == today
       assert completed_nba_game.home_team == home_team
@@ -113,7 +113,9 @@ defmodule NbaGameTest do
     end
 
     test "returns processes any associated nba_lines" do
-      nba_game = create(:nba_game)
+      {year, month, day} = Date.utc_today() |> Date.to_erl()
+      past_date = {year - 1, month, day} |> Date.from_erl!()
+      nba_game = create(:nba_game, %{date: past_date})
       user = create(:user)
       _nba_line = create(:nba_line, %{nba_game: nba_game, user: user})
 
@@ -123,10 +125,11 @@ defmodule NbaGameTest do
       complete_params = %{
         "nba_game_id" => nba_game.id,
         "home_team_score" => home_team_score,
-        "away_team_score" => away_team_score
+        "away_team_score" => away_team_score,
+        "is_finished?" => true
       }
 
-      {:ok, completed_nba_game} = NbaGame.Api.complete_nba_game(complete_params)
+      {:ok, completed_nba_game} = NbaGame.Api.update_nba_game(complete_params)
 
       NbaLine.Api.get_lines_for_game(completed_nba_game.id)
       |> Enum.each(fn(nba_line) -> assert nba_line.result end)
@@ -173,7 +176,7 @@ defmodule NbaGameTest do
 
         assert games_created == 8
 
-        {:ok, games_completed} = NbaGame.Api.handle_complete_nba_games_by_date(past_date)
+        {:ok, games_completed} = NbaGame.Api.handle_update_nba_games_by_date(past_date)
 
         assert games_completed == 8
       end

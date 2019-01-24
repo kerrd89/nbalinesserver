@@ -1,8 +1,10 @@
 defmodule NbaLinesServer.NbaGame do
     use NbaLinesServer.Web, :model
   
+    @optional_fields [:bet_count]
     @create_game_required_fields [:date, :home_team, :away_team]
-    @complete_game_required_fields [:home_team_score, :away_team_score, :completed, :bet_count]
+    @complete_game_required_fields [:home_team_score, :away_team_score, :completed]
+    @update_game_required_fields [:home_team_score, :away_team_score]
   
     schema "nba_games" do
         field :date, :date
@@ -28,7 +30,14 @@ defmodule NbaLinesServer.NbaGame do
     @doc "changeset to record the result of an nba game"
     def complete_game_changeset(model, params \\ :empty) do
         model
-        |> cast(params, @complete_game_required_fields)
+        |> cast(params, @complete_game_required_fields ++ @optional_fields)
         |> validate_required(@complete_game_required_fields)
     end
-  end
+
+    @doc "changeset to update the progress of an nba game"
+    def update_game_changeset(model, params \\ :empty) do
+        model
+        |> cast(params, @update_game_required_fields ++ @optional_fields)
+        |> validate_required(@update_game_required_fields)
+    end
+end

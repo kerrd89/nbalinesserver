@@ -52,7 +52,8 @@ defmodule NbaLinesServer.MixProject do
       :poison,
       :comeonin,
       :cors_plug,
-      :httpoison
+      :httpoison,
+      :quantum
     ]
   end
 
@@ -76,6 +77,8 @@ defmodule NbaLinesServer.MixProject do
       {:gettext, "0.16.0"},
       {:cors_plug, "2.0.0"},
       {:httpoison, "~> 1.4"},
+      {:quantum, "~> 2.3"},
+      {:timex, "~> 3.0"},
 
       # test dependencies
       {:coverex, "~> 1.5.0", only: :test},
@@ -91,10 +94,12 @@ defmodule NbaLinesServer.MixProject do
 
   defp aliases do
     [
-    test: ["ecto.create --quiet", "ecto.migrate", "test"],
-    test: ["ecto.create --quiet", "ecto.migrate", "test"],
-    "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
-    "ecto.reset": ["ecto.drop", "ecto.setup"],
+      test: ["ecto.create --quiet", "ecto.migrate", "test"],
+      test: ["ecto.create --quiet", "ecto.migrate", "test"],
+      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      "ecto.reset": ["ecto.drop", "ecto.setup"],
+      server: ["phx.server"],
+      s: ["phx.server"],
     ]
   end
 end

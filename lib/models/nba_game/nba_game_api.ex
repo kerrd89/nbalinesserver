@@ -59,33 +59,47 @@ defmodule NbaGame.Api do
     end
 
     @doc "helper method to complete an nba game"
-    @spec complete_nba_game(params :: map()) :: {:ok, NbaLine} | {:error, list()}
-    def complete_nba_game(params) do
+    @spec update_nba_game(params :: map()) :: {:ok, NbaLine} | {:error, list()}
+    def update_nba_game(params) do
         nba_game_id = Map.get(params, "nba_game_id", nil)
+        is_finished? = Map.get(params, "is_finished?", nil)
 
-        if is_nil(nba_game_id) do
-            {:error, "nba_game_id invalid"}
-        else
-            case Repo.get(NbaGame, nba_game_id) do
-                %NbaGame{} = game ->
-                    nba_game_changeset = NbaGame.complete_game_changeset(game, %{
-                        home_team_score: params["home_team_score"],
-                        away_team_score: params["away_team_score"],
-                        completed: true,
-                        bet_count: 0
-                    })
-                        
-                    if nba_game_changeset.valid? do
-                        {:ok, nba_game} = response = Repo.update(nba_game_changeset)
-
-                        NbaLine.Api.process_bets(nba_game)
-
-                        response
-                    else
-                        {:error, nba_game_changeset.errors}
-                    end
-                _ -> {:error, "nba_game_id invalid"}
-            end
+        case {is_finished?, nba_game_id} do
+            {_, nil} -> {:error, "nba_game_id invalid"}
+            {nil, nba_game_id} ->
+                # update
+                case Repo.get(NbaGame, nba_game_id) do
+                    %NbaGame{} = game ->
+                        nba_game_changeset = NbaGame.update_game_changeset(game, %{
+                            home_team_score: params["home_team_score"],
+                            away_team_score: params["away_team_score"]
+                        })
+                        if nba_game_changeset.valid? do
+                            Repo.update(nba_game_changeset)
+                        else
+                            {:error, nba_game_changeset.errors}
+                        end
+                    _ -> {:error, "nba_game_id invalid"}
+                end
+            {true, nba_game_id} ->
+                # complete
+                case Repo.get(NbaGame, nba_game_id) do
+                    %NbaGame{} = game ->
+                        nba_game_changeset = NbaGame.complete_game_changeset(game, %{
+                            home_team_score: params["home_team_score"],
+                            away_team_score: params["away_team_score"],
+                            completed: true,
+                            bet_count: 0
+                        })
+                        if nba_game_changeset.valid? do
+                            {:ok, nba_game} = response = Repo.update(nba_game_changeset)
+                            NbaLine.Api.process_bets(nba_game)
+                            response
+                        else
+                            {:error, nba_game_changeset.errors}
+                        end
+                    _ -> {:error, "nba_game_id invalid"}
+                end
         end
     end
 
@@ -148,10 +162,10 @@ defmodule NbaGame.Api do
     end
 
     @doc """
-    helper method to completed new nba_games from api json response from data.nba.net
+    helper method to update new nba_games from api json response from data.nba.net
     """
-    @spec handle_complete_nba_games_by_date(date :: Date) :: {:ok, integer()} | {:error, Sring.t()}
-    def handle_complete_nba_games_by_date(date) do
+    @spec handle_update_nba_games_by_date(date :: Date) :: {:ok, integer()} | {:error, Sring.t()}
+    def handle_update_nba_games_by_date(date) do
         uncompleted_nba_games = get_uncompleted_nba_games_by_date(date)
 
         unless Enum.count(uncompleted_nba_games) == 0 do
@@ -182,7 +196,7 @@ defmodule NbaGame.Api do
                                 "away_team_score" => away_team_score
                             }
                     
-                            case complete_nba_game(complete_params) do
+                            case update_nba_game(complete_params) do
                                 {:ok, %NbaGame{}} -> acc + 1
                                 {:error, _error} -> acc
                             end

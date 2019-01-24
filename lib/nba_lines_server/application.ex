@@ -11,9 +11,8 @@ defmodule NbaLinesServer.Application do
     # List all child processes to be supervised
     children = [
       Plug.Adapters.Cowboy.child_spec(scheme: :http, plug: NbaLinesServer.Router, options: [port: 8085]),
-      supervisor(NbaLinesServer.Repo, [])
-      # Starts a worker by calling: NbaLinesServer.Worker.start_link(arg)
-      # {NbaLinesServer.Worker, arg}
+      supervisor(NbaLinesServer.Repo, []),
+      worker(NbaLinesServer.QuantumScheduler, [])
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
