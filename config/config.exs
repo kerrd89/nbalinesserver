@@ -25,5 +25,12 @@ else
     jobs: []
 end
 
+config :nba_lines_server, NbaLinesServer.Guardian,
+  # allowed_algos: ["HS512"],
+  issuer: "NbaLinesServer",
+  # permissions: %{},
+  # ttl: { 30, :days },
+  # verify_issuer: true, # optional
+  secret_key: "9OoKcTRKkVCwF4+vt1ziP+JZhuHjbqGq61nYwwBiSYollHARthhXTp32e0CTw/6J"
 
 import_config "#{Mix.env()}.exs"

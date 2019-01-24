@@ -65,7 +65,7 @@ defmodule NbaLinesServer.User do
     defp put_pass_hash(passed_changeset) do
       case passed_changeset do
         %Ecto.Changeset{valid?: true, changes: %{password: pass}} ->
-          put_change(passed_changeset, :password_hash, Bcrypt.hashpwsalt(pass))
+          change(passed_changeset, password_hash: Bcrypt.hashpwsalt(pass))
         _ ->
           passed_changeset
       end

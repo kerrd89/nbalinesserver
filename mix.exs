@@ -74,6 +74,7 @@ defmodule NbaLinesServer.MixProject do
       {:guardian, "1.2.1"},
       {:guardian_db, "2.0.0"},
       {:comeonin, "1.6.0"},
+      {:bcrypt_elixir, "~> 1.1"},
       {:gettext, "0.16.0"},
       {:cors_plug, "2.0.0"},
       {:httpoison, "~> 1.4"},

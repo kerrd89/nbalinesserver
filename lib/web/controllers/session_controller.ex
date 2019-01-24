@@ -14,8 +14,7 @@ defmodule NbaLinesServer.SessionController do
     @doc "Handle `POST` request to login with a JSON payload username/password"
     def login(conn, %{"email" => email, "password" => password}) do  
       Logger.info "Trying login = email: #{email} password: #{password}"
-      login_result = Authentication.api_login_by_email_and_pass(conn,
-        email, password, repo: Repo)
+      login_result = Authentication.api_login_by_email_and_pass(conn, email, password, [])
       case login_result do
         {:ok, token} -> json(conn, %{token: token})
         {:error, _reason, conn} ->

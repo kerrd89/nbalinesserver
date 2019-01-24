@@ -3,7 +3,7 @@ defmodule User.Api do
     alias NbaLinesServer.User
   
     @doc "helper method to get user by id"
-    @spec get_user_by_id(user_id :: integer) :: list()
+    @spec get_user_by_id(user_id :: integer) :: User
     def get_user_by_id(user_id), do: Repo.get(User, user_id)
 
     @doc "helper method to get user with a given email"

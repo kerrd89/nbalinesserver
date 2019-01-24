@@ -2,11 +2,17 @@ defmodule NbaLinesServer.SessionControllerTest do
   use NbaLinesServer.ConnCase
   import NbaLinesServer.Factory
 
-  alias Comeonin.Bcrypt
-
   setup do
-    user = create(:user, session_count: 0, password: "password",
-      password_hash: Bcrypt.hashpwsalt("password"))
+    user = build(:user)
+
+    changeset = NbaLinesServer.User.registration_changeset(%NbaLinesServer.User{}, %{
+      "first_name" => user.first_name,
+      "last_name" => user.last_name,
+      "email" => user.email,
+      "password" => user.password
+    })
+
+    user = NbaLinesServer.Repo.insert!(changeset)
 
     {:ok, %{user: user}}
   end

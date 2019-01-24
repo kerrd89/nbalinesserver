@@ -8,8 +8,6 @@ defmodule NbaLinesServer.Router do
     
     pipeline :api do
         plug Plug.Logger
-        # plug(:match)
-        # plug(:dispatch)
         plug :accepts, "json"
     end
 
@@ -24,9 +22,11 @@ defmodule NbaLinesServer.Router do
         plug NbaLinesServer.Plug.ApiAuthorizationPlug
         plug Guardian.Plug.EnsureAuthenticated
     end
-  
-    post "/authenticate", SessionController, :create
-    post "/login", SessionController, :login
-    delete "/logout", SessionController, :logout
+
+    scope "/", NbaLinesServer do
+        pipe_through [:api]
+        post "/login", SessionController, :login
+        delete "/logout", SessionController, :logout
+    end
 end
   

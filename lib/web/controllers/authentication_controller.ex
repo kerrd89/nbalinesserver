@@ -6,8 +6,10 @@ defmodule NbaLinesServer.Authentication do
   
     import Plug.Conn
     import Comeonin.Bcrypt, only: [checkpw: 2]
-    alias NbaLinesServer.Guardian.Plug
     
+    alias NbaLinesServer.Guardian.Plug
+    alias NbaLinesServer.Repo
+
     @doc "Login by HTTP POST parameters"
     def login(conn, user) do
       conn
@@ -25,10 +27,9 @@ defmodule NbaLinesServer.Authentication do
     Login by API JSON parameters for user name and password to set up a
     users session and ensure they are logged in.
     """
-    def login_by_email_and_pass(conn, email, given_pass, opts) do
-      repo = Keyword.fetch!(opts, :repo)
-      user = repo.get_by(NbaLinesServer.User, email: email)
-  
+    def login_by_email_and_pass(conn, email, given_pass, _opts) do
+      user = Repo.get_by(NbaLinesServer.User, email: email)
+
       cond do
         user && !user.deleted && checkpw(given_pass, user.password_hash) ->
           {:ok, login(conn, user)}
@@ -40,9 +41,8 @@ defmodule NbaLinesServer.Authentication do
     end
   
     @doc "Login by API email and password to generate and return a token"
-    def api_login_by_email_and_pass(conn, email, password, opts) do
-      repo = Keyword.fetch!(opts, :repo)
-      user = repo.get_by(NbaLinesServer.User, email: email)
+    def api_login_by_email_and_pass(conn, email, password, _opts) do
+      user = Repo.get_by(NbaLinesServer.User, email: email)
       cond do
         user && checkpw(password, user.password_hash) ->
           {:ok, jwt, _full_claims} = NbaLinesServer.Guardian.encode_and_sign(user)

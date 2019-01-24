@@ -10,7 +10,7 @@ defmodule NbaLinesServer.Guardian do
     use Guardian, otp_app: :nba_lines_server
     
     def subject_for_token(%NbaLinesServer.User{} = user, _claims) do
-      {:ok, "NbaLinesServer.User:#{user.id}"}
+      {:ok, to_string(user.id)}
     end
   
     def subject_for_token(_, _) do
@@ -18,9 +18,10 @@ defmodule NbaLinesServer.Guardian do
     end
   
     def resource_from_claims(%{"sub" => "User:" <> user_id} = _claims) do
-      user = User.Api.get_user_by_id(user_id)
-  
-      {:ok, user}
+      case User.Api.get_user_by_id(user_id) do
+        nil -> {:error, :resource_not_found}
+        user -> {:ok, user}
+      end
     end
   
     def resource_from_claims(_claims) do
