@@ -29,7 +29,7 @@ defmodule NbaLinesServer.AuthenticationController do
       cond do
         not is_nil(user) && !user.deleted && checkpw(password, user.password_hash) ->
           {:ok, jwt, _full_claims} = NbaLinesServer.Guardian.encode_and_sign(user)
-          {:ok, jwt}
+          {:ok, jwt, user}
         user ->
           {:error, :unauthorized, conn}
         true ->

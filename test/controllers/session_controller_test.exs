@@ -30,7 +30,13 @@ defmodule NbaLinesServer.SessionControllerTest do
     assert json_response(conn, 200)
 
     payload = conn.resp_body |> Poison.decode!
+    user_resp = payload["user"]
 
     refute is_nil(payload["token"])
+
+    assert user_resp["id"] == user.id
+    assert user_resp["first_name"] == user.first_name
+    assert user_resp["last_name"] == user.last_name
+    assert user_resp["email"] == user.email
   end
 end

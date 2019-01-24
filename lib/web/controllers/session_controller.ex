@@ -16,7 +16,7 @@ defmodule NbaLinesServer.SessionController do
       login_result = AuthenticationController.api_login_by_email_and_pass(conn, email, password, [])
 
       case login_result do
-        {:ok, token} -> json(conn, %{token: token})
+        {:ok, token, user} -> json(conn, %{token: token, user: user})
         {:error, _reason, conn} ->
           conn
           |> put_status(302)
