@@ -4,7 +4,6 @@ defmodule NbaLinesServer.AuthenticationController do
     browsers and external API integration endpoints.
     """
   
-    import Plug.Conn
     import Comeonin.Bcrypt, only: [checkpw: 2]
     
     alias NbaLinesServer.Guardian.Plug

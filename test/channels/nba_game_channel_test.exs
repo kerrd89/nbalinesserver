@@ -14,15 +14,18 @@ defmodule NbaLinesServer.NbaGameChannelTest do
   
     describe "join/3" do
         test "cannot join without the secret", %{user: user} do
-            {:ok, jwt, _full_claims} = NbaLinesServer.Guardian.encode_and_sign(user)
-            {:ok, socket} = socket(UserSocket)
-            assert {:error, :secret_not_found} = subscribe_and_join(socket, NbaGameChannel, "nba_games", %{"guardian_token" => jwt})
+            # log someone in, to make sure we don't cross sessions
+            {:ok, _jwt, _full_claims} = NbaLinesServer.Guardian.encode_and_sign(user)
+
+            socket = socket(UserSocket)
+
+            assert {:error, :invalid} == subscribe_and_join(socket, NbaGameChannel, "nba_games", %{"guardian_token" => "dlfakjdlafjdk"})
         end
   
         test "authenticated_users recieve nba_games when they join the channel", %{user: user} do
             {:ok, jwt, _full_claims} = NbaLinesServer.Guardian.encode_and_sign(user)
     
-            {:ok, socket} = connect(UserSocket, %{"guardian_token" => jwt}, %{})
+            socket = socket(UserSocket, %{"guardian_token" => "#{jwt}"}, %{})
             {:ok, payload, _socket} = subscribe_and_join(socket, NbaGameChannel, "nba_games", %{"guardian_token" => "#{jwt}"})
     
             # test alert_helper payload in alert_helper_test, here we just check it is returned

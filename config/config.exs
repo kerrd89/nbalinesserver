@@ -6,7 +6,8 @@ config :nba_lines_server, NbaLinesServer.Endpoint,
   url: [host: "localhost"],
   root: Path.dirname(__DIR__),
   secret_key_base: "nLAKTG8MOQYT0etIUW8x7hIAm0HfkiGC5kUCqARexopyuZS8Wrpv3lnBgcCHRdVD",
-  render_errors: [accepts: ~w(html json)]
+  render_errors: [accepts: ~w(html json)],
+  pubsub: [name: NbaLinesServer.PubSub, adapter: Phoenix.PubSub.PG2]
 
 config :nba_lines_server, NbaLinesServer.Repo,
   adapter: Ecto.Adapters.Postgres,
