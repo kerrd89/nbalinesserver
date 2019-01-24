@@ -4,6 +4,7 @@ defmodule NbaLinesServer.NbaGameChannel do
     """
   
     use NbaLinesServer.Web, :channel
+    require Logger
   
     @doc "Join the nba_games channel"
     def join("nba_games", %{"guardian_token" => token}, socket) do
@@ -13,7 +14,8 @@ defmodule NbaLinesServer.NbaGameChannel do
 
             {:ok, %{nba_games: nba_games}, socket}
         else
-            {:error, _} = resp ->
+            {:error, reason} = resp ->
+                Logger.info("#{inspect reason}")
                 resp
         end
     end
@@ -25,9 +27,10 @@ defmodule NbaLinesServer.NbaGameChannel do
 
     def verify_token(token) do
         case NbaLinesServer.Guardian.decode_and_verify(token) do
-            {:ok, claims} ->
+            {:ok, _claims} ->
                 {:ok, "valid_token"}
-            {:error, _} = resp ->
+            {:error, reason} ->
+                Logger.info("invalid token #{inspect reason}")
                 {:error, "invalid_token"}
         end
     end

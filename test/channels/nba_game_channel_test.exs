@@ -14,7 +14,7 @@ defmodule NbaLinesServer.NbaGameChannelTest do
   
     describe "join/3" do
         test "empty params return plug authentication error" do
-            assert {:error, :authentication_required} == subscribe_and_join(socket, NbaGameChannel, "nba_games", %{})
+            assert {:error, :authentication_required} == subscribe_and_join(socket(UserSocket), NbaGameChannel, "nba_games", %{})
         end
 
         test "cannot join without a valid token", %{user: user} do
