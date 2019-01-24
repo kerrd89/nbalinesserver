@@ -23,9 +23,6 @@ defmodule NbaLinesServer.NbaGameChannel do
         {:error, :authentication_required}
     end
 
-    @salt "4Q1cajEv"
-    @max_age 86400
-
     def verify_token(token) do
         case NbaLinesServer.Guardian.decode_and_verify(token) do
             {:ok, claims} ->
