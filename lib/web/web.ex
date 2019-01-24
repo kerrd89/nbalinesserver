@@ -57,6 +57,16 @@ defmodule NbaLinesServer.Web do
         def join(room, params, socket) when params == %{} do
           {:error, :authentication_required}
         end
+
+        def verify_token(token) do
+          case NbaLinesServer.Guardian.decode_and_verify(token) do
+              {:ok, _claims} ->
+                  {:ok, "valid_token"}
+              {:error, reason} ->
+                  Logger.info("invalid token #{inspect reason}")
+                  {:error, "invalid_token"}
+          end
+        end
       end
     end
   
