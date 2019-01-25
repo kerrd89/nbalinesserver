@@ -22,6 +22,7 @@ defmodule NbaLinesServer.Router do
 
     scope "/" do
         pipe_through [:api]
+        post "/register", NbaLinesServer.SessionController, :register
         post "/login", NbaLinesServer.SessionController, :login
         delete "/logout", NbaLinesServer.SessionController, :logout
     end

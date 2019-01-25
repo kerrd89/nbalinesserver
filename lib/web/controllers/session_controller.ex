@@ -23,6 +23,26 @@ defmodule NbaLinesServer.SessionController do
           |> json("Invalid email/password combination")
       end
     end
+
+    @doc "handle POST request to register a new user"
+    def register(conn, params) do
+      # TODO: do some input sanitization here
+
+      case User.Api.create_user(params) do
+        {:ok, user} ->
+          login(conn, params)
+        {:error, reason} ->
+          errors = reason |> Enum.map(fn({key, {reason,_}}) ->
+            %{to_string(key) => reason}
+          end)
+
+          conn
+          |> put_status(302)
+          |> json(%{
+            "reasons" => errors
+          })
+      end
+    end
   
     @doc "Expire the users session and token"
     def logout(conn, %{"id" => _id}) do
