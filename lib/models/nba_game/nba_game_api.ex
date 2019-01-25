@@ -64,21 +64,6 @@ defmodule NbaGame.Api do
 
         case {is_finished?, nba_game_id} do
             {_, nil} -> {:error, "nba_game_id invalid"}
-            {nil, nba_game_id} ->
-                # update
-                case Repo.get(NbaGame, nba_game_id) do
-                    %NbaGame{} = game ->
-                        nba_game_changeset = NbaGame.update_game_changeset(game, %{
-                            home_team_score: params["home_team_score"],
-                            away_team_score: params["away_team_score"]
-                        })
-                        if nba_game_changeset.valid? do
-                            Repo.update(nba_game_changeset)
-                        else
-                            {:error, nba_game_changeset.errors}
-                        end
-                    _ -> {:error, "nba_game_id invalid"}
-                end
             {true, nba_game_id} ->
                 # complete
                 case Repo.get(NbaGame, nba_game_id) do
@@ -93,6 +78,21 @@ defmodule NbaGame.Api do
                             {:ok, nba_game} = response = Repo.update(nba_game_changeset)
                             NbaLine.Api.process_bets(nba_game)
                             response
+                        else
+                            {:error, nba_game_changeset.errors}
+                        end
+                    _ -> {:error, "nba_game_id invalid"}
+                end
+            {_, nba_game_id} ->
+                # update
+                case Repo.get(NbaGame, nba_game_id) do
+                    %NbaGame{} = game ->
+                        nba_game_changeset = NbaGame.update_game_changeset(game, %{
+                            home_team_score: params["home_team_score"],
+                            away_team_score: params["away_team_score"]
+                        })
+                        if nba_game_changeset.valid? do
+                            Repo.update(nba_game_changeset)
                         else
                             {:error, nba_game_changeset.errors}
                         end

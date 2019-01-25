@@ -27,9 +27,8 @@ defmodule NbaLinesServer.SessionController do
     @doc "handle POST request to register a new user"
     def register(conn, params) do
       # TODO: do some input sanitization here
-
       case User.Api.create_user(params) do
-        {:ok, user} ->
+        {:ok, _user} ->
           login(conn, params)
         {:error, reason} ->
           errors = reason |> Enum.map(fn({key, {reason,_}}) ->
