@@ -193,7 +193,8 @@ defmodule NbaGame.Api do
                             search.home_team == home_team and search.away_team == away_team
                         end)
 
-                        unless is_nil(uncompleted_game) do
+                        # if the game exists
+                        if not is_nil(uncompleted_game) do
                             complete_params = %{
                                 "nba_game_id" => uncompleted_game.id,
                                 "home_team_score" => home_team_score,
@@ -205,6 +206,8 @@ defmodule NbaGame.Api do
                                 {:ok, %NbaGame{}} -> acc + 1
                                 {:error, _error} -> acc
                             end
+                        else
+                            acc
                         end
                     end)
 
