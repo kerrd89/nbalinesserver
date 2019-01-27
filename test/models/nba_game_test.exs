@@ -21,7 +21,7 @@ defmodule NbaGameTest do
     test "returns an error if missing params" do
       {:error, message} = NbaGame.Api.create_nba_game(%{})
 
-      assert message == [date: {"can't be blank", [validation: :required]}, home_team: {"can't be blank", [validation: :required]}, away_team: {"can't be blank", [validation: :required]}]
+      assert message == [date: {"can't be blank", [validation: :required]}, home_team: {"can't be blank", [validation: :required]}, away_team: {"can't be blank", [validation: :required]}, start_time: {"can't be blank", [validation: :required]}]
     end
 
     test "returns no error if no missing params" do
@@ -32,7 +32,8 @@ defmodule NbaGameTest do
       params = %{
         "date" => today,
         "home_team" => home_team,
-        "away_team" => away_team
+        "away_team" => away_team,
+        "start_time" => NaiveDateTime.utc_now()
       }
 
       {:ok, nba_game} = NbaGame.Api.create_nba_game(params)
@@ -52,7 +53,8 @@ defmodule NbaGameTest do
       params = %{
         "date" => today,
         "home_team" => home_team,
-        "away_team" => away_team
+        "away_team" => away_team,
+        "start_time" => NaiveDateTime.utc_now()
       }
 
       {:ok, nba_game} = NbaGame.Api.create_nba_game(params)
@@ -78,7 +80,9 @@ defmodule NbaGameTest do
 
       assert message == [
         home_team_score: {"can't be blank", [validation: :required]},
-        away_team_score: {"can't be blank", [validation: :required]}
+        away_team_score: {"can't be blank", [validation: :required]},
+        period: {"can't be blank", [validation: :required]},
+        clock: {"can't be blank", [validation: :required]}
       ]
     end
 
@@ -92,15 +96,38 @@ defmodule NbaGameTest do
       params = %{
         "date" => today,
         "home_team" => home_team,
-        "away_team" => away_team
+        "away_team" => away_team,
+        "start_time" => NaiveDateTime.utc_now()
       }
 
       {:ok, nba_game} = NbaGame.Api.create_nba_game(params)
+
+      update_params = %{
+        "nba_game_id" => nba_game.id,
+        "home_team_score" => home_team_score,
+        "away_team_score" => away_team_score,
+        "period" => 3,
+        "clock" => "00:02"
+      }
+
+      {:ok, updated_nba_game} = NbaGame.Api.update_nba_game(update_params)
+
+      assert updated_nba_game.date == today
+      assert updated_nba_game.home_team == home_team
+      assert updated_nba_game.home_team_score == home_team_score
+      assert updated_nba_game.away_team == away_team
+      assert updated_nba_game.away_team_score == away_team_score
+      assert updated_nba_game.period == 3
+      assert updated_nba_game.clock == "00:02"
+      refute updated_nba_game.completed
 
       complete_params = %{
         "nba_game_id" => nba_game.id,
         "home_team_score" => home_team_score,
         "away_team_score" => away_team_score,
+        "period" => 4,
+        "clock" => "",
+        "is_finished?" => true
       }
 
       {:ok, completed_nba_game} = NbaGame.Api.update_nba_game(complete_params)
@@ -110,6 +137,9 @@ defmodule NbaGameTest do
       assert completed_nba_game.home_team_score == home_team_score
       assert completed_nba_game.away_team == away_team
       assert completed_nba_game.away_team_score == away_team_score
+      assert completed_nba_game.completed
+      assert completed_nba_game.clock == nil
+      assert completed_nba_game.period == 4
     end
 
     test "returns processes any associated nba_lines" do

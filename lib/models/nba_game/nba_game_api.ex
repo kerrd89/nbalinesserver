@@ -2,6 +2,8 @@ defmodule NbaGame.Api do
     alias NbaLinesServer.Repo
     alias NbaLinesServer.NbaGame
 
+    require Logger
+
     import Ecto.Query, only: [from: 2]
   
     @doc "helper method to get all nba games for a certain date"
@@ -46,7 +48,8 @@ defmodule NbaGame.Api do
       nba_game_changeset = NbaGame.create_game_changeset(%NbaGame{}, %{
         date: params["date"],
         home_team: params["home_team"],
-        away_team: params["away_team"]
+        away_team: params["away_team"],
+        start_time: params["start_time"]
       })
   
       if nba_game_changeset.valid? do
@@ -71,6 +74,8 @@ defmodule NbaGame.Api do
                         nba_game_changeset = NbaGame.complete_game_changeset(game, %{
                             home_team_score: params["home_team_score"],
                             away_team_score: params["away_team_score"],
+                            clock: params["clock"],
+                            period: params["period"],
                             completed: true,
                             bet_count: 0
                         })
@@ -89,7 +94,9 @@ defmodule NbaGame.Api do
                     %NbaGame{} = game ->
                         nba_game_changeset = NbaGame.update_game_changeset(game, %{
                             home_team_score: params["home_team_score"],
-                            away_team_score: params["away_team_score"]
+                            away_team_score: params["away_team_score"],
+                            clock: params["clock"],
+                            period: params["period"]
                         })
                         if nba_game_changeset.valid? do
                             Repo.update(nba_game_changeset)
@@ -136,16 +143,20 @@ defmodule NbaGame.Api do
                     games_created = Enum.reduce(nba_games, 0, fn(nba_game, acc) ->
                         home_team = Map.get(nba_game, "hTeam", %{}) |> Map.get("triCode", nil)
                         away_team = Map.get(nba_game, "vTeam", %{}) |> Map.get("triCode", nil)
-                        
+                        start_time = Map.get(nba_game, "startTimeUTC", nil) |> NaiveDateTime.from_iso8601!()
+
                         params = %{
                             "date" => date,
                             "home_team" => home_team,
-                            "away_team" => away_team
+                            "away_team" => away_team,
+                            "start_time" => start_time
                         }
 
                         case create_nba_game(params) do
-                            {:ok, %NbaGame{}} -> acc + 1
-                            {:error, _error} -> acc
+                            {:ok, %NbaGame{}} ->
+                                acc + 1
+                            {:error, error} ->
+                                acc
                         end
                     end)
 
@@ -186,6 +197,8 @@ defmodule NbaGame.Api do
                         away_team = Map.get(nba_game, "vTeam", %{}) |> Map.get("triCode", nil)
                         home_team_score = Map.get(nba_game, "hTeam", %{}) |> Map.get("score", nil)
                         away_team_score = Map.get(nba_game, "vTeam", %{}) |> Map.get("score", nil)
+                        period = Map.get(nba_game, "period", %{}) |> Map.get("current", nil)
+                        clock = Map.get(nba_game, "clock", nil)
                         status_num = Map.get(nba_game, "statusNum", 1)
 
                         # assumption at this date is that games are only for this day, only check for teams
@@ -199,12 +212,16 @@ defmodule NbaGame.Api do
                                 "nba_game_id" => uncompleted_game.id,
                                 "home_team_score" => home_team_score,
                                 "away_team_score" => away_team_score,
+                                "period" => period,
+                                "clock" => clock,
                                 "is_finished?" => status_num == 3
                             }
 
                             case update_nba_game(complete_params) do
                                 {:ok, %NbaGame{}} -> acc + 1
-                                {:error, _error} -> acc
+                                {:error, error} ->
+                                    Logger.error(error)
+                                    acc
                             end
                         else
                             acc
