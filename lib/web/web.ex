@@ -59,7 +59,7 @@ defmodule NbaLinesServer.Web do
         end
 
         def verify_token(token) do
-          case NbaLinesServer.Guardian.decode_and_verify(token) do
+          case NbaLinesServer.Guardian.decode_and_verify(token, %{"typ" => "access"}) do
               {:ok, _claims} ->
                   {:ok, "valid_token"}
               {:error, reason} ->

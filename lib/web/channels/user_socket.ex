@@ -12,30 +12,18 @@ defmodule NbaLinesServer.UserSocket do
   
     ## Channels
     channel "nba_games", NbaLinesServer.NbaGameChannel
-    channel "nba_lines", NbaLinesServer.NbaLineChannel
+    channel "user:*", NbaLinesServer.UserChannel
   
     ## Transports
     transport :websocket, Phoenix.Transports.WebSocket
-  
-    # Socket params are passed from the client and can
-    # be used to verify and authenticate a user. After
-    # verification, you can put default assigns into
-    # the socket that will be set for all channels, ie
-    #
-    #     {:ok, assign(socket, :user_id, verified_user_id)}
-    #
-    # To deny connection, return `:error`.
-    #
-    # See `Phoenix.Token` documentation for examples in
-    # performing token verification on connect.
 
     def connect(%{"guardian_token" => token}, socket) do
-      auth = Guardian.Phoenix.Socket.authenticate(socket,
-        NbaLinesServer.Guardian, token)
-  
-      case auth do
-        {:ok, auth_socket} -> {:ok, auth_socket}
-        _ -> :error
+      case NbaLinesServer.Guardian.decode_and_verify(token, %{"typ" => "access"}) do
+        {:ok, _claims} ->
+            {:ok, socket}
+        {:error, reason} ->
+            Logger.info("invalid token #{inspect reason}")
+            {:error, "invalid_token"}
       end
     end
   

@@ -4,7 +4,7 @@ use Mix.Config
 
 config :nba_lines_server, NbaLinesServer.Endpoint,
   http: [port: System.get_env("NBALINESSERVER_PORT") || 4001],
-  url: [host: "localhost"],
+  url: [host: "192.168.0.152"],
   root: Path.dirname(__DIR__),
   secret_key_base: "nLAKTG8MOQYT0etIUW8x7hIAm0HfkiGC5kUCqARexopyuZS8Wrpv3lnBgcCHRdVD",
   render_errors: [accepts: ~w(html json)],

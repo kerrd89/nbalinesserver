@@ -6,6 +6,8 @@ defmodule NbaLinesServer.NbaGame do
     @complete_game_required_fields [:home_team_score, :away_team_score, :completed]
     @update_game_required_fields [:home_team_score, :away_team_score]
   
+    @derive {Poison.Encoder, only: [:date, :home_team, :home_team_score, :away_team, :away_team_score, :completed, :bet_count, :updated_at]}
+
     schema "nba_games" do
         field :date, :date
         field :home_team, :string
