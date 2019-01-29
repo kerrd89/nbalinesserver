@@ -27,16 +27,16 @@ defmodule NbaLinesServer.UserChannel do
         {:error, :authentication_required}
     end
   
-    # @doc "Handle marking an alert as awknowledged"
-    # def handle_in("create_line", params, socket) do
-    #     case NbaLine.Api.create_nba_line(params) do
-    #         {:ok, %NbaLinesServer.NbaLine{}} ->
-    #             nba_lines = NbaLine.Api.get_nba_lines_by_user_id(params["user_id"])
+    @doc "Handle marking an alert as awknowledged"
+    def handle_in("pick_line", params, socket) do
+        case NbaLine.Api.create_nba_line(params) do
+            {:ok, %NbaLinesServer.NbaLine{}} ->
+                nba_lines = NbaLine.Api.get_nba_lines_by_user_id(params["user_id"])
 
-    #             {:reply, {:ok, %{nba_lines: nba_lines}}, socket}
-    #         {:error, error} -> {:reply, {:error, %{"error" => error}}, socket}
-    #     end
+                {:reply, {:ok, %{nba_lines: nba_lines}}, socket}
+            {:error, error} -> {:reply, {:error, %{"error" => error}}, socket}
+        end
     
-    #     {:reply, :ok, socket}
-    # end
+        {:reply, :ok, socket}
+    end
 end

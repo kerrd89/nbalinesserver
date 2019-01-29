@@ -1,7 +1,6 @@
 defmodule NbaLinesServer.SyncHelper do
     @doc """
     helper method for syncing the nba games
-    evaluate the last sync date, sync all dates back to that date
     """
     require Logger
     @spec sync_nba_games() :: {:ok, map()} | {:error, String.t}
@@ -25,4 +24,11 @@ defmodule NbaLinesServer.SyncHelper do
 
         {:ok, %{games_created: games_created, games_completed: games_completed}}
     end
+
+    @doc """
+    helper method for syncing the nba lines
+    an nba_offered_line represents a point in time, a single NBA games should have
+    many nba_offered_lines, since this will be running on a cron job for games for today,
+    and for games in the future.
+    """
 end

@@ -80,9 +80,7 @@ defmodule NbaGameTest do
 
       assert message == [
         home_team_score: {"can't be blank", [validation: :required]},
-        away_team_score: {"can't be blank", [validation: :required]},
-        period: {"can't be blank", [validation: :required]},
-        clock: {"can't be blank", [validation: :required]}
+        away_team_score: {"can't be blank", [validation: :required]}
       ]
     end
 

@@ -15,7 +15,7 @@ defmodule NbaLineTest do
 
       {:error, message} = NbaLine.Api.create_nba_line(%{"nba_game_id" => nba_game.id})
 
-      assert message == [line: {"can't be blank", [validation: :required]}, bet: {"can't be blank", [validation: :required]}, user_id: {"can't be blank", [validation: :required]}]
+      assert message == [line: {"can't be blank", [validation: :required]}, bet: {"can't be blank", [validation: :required]}, user_id: {"can't be blank", [validation: :required]}, nba_offered_line_id: {"can't be blank", [validation: :required]}]
     end
 
     test "returns error if given no nba_game_id" do
@@ -46,12 +46,14 @@ defmodule NbaLineTest do
     test "creates an nba_line when given valid params" do
       nba_game = create(:nba_game)
       user = create(:user)
+      nba_offered_line = create(:nba_offered_line)
 
       params = %{
         "nba_game_id" => nba_game.id,
         "user_id" => user.id,
         "line" => -5,
-        "bet" => true
+        "bet" => true,
+        "nba_offered_line_id" => nba_offered_line.id
       }
 
       {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
@@ -64,13 +66,14 @@ defmodule NbaLineTest do
     test "home team underdog, bet for the home team, home team wins outright" do
       nba_game = create(:nba_game)
       user = create(:user)
-
+      nba_offered_line = create(:nba_offered_line)
 
       params = %{
         "nba_game_id" => nba_game.id,
         "user_id" => user.id,
         "line" => -5,
-        "bet" => true
+        "bet" => true,
+        "nba_offered_line_id" => nba_offered_line.id
       }
 
       {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
@@ -85,13 +88,14 @@ defmodule NbaLineTest do
     test "home team underdog, bet against the home team, home team wins outright" do
       nba_game = create(:nba_game)
       user = create(:user)
-
+      nba_offered_line = create(:nba_offered_line)
 
       params = %{
         "nba_game_id" => nba_game.id,
         "user_id" => user.id,
         "line" => -5,
-        "bet" => false
+        "bet" => false,
+        "nba_offered_line_id" => nba_offered_line.id
       }
 
       {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
@@ -106,13 +110,14 @@ defmodule NbaLineTest do
     test "home team underdog, bet for the home team, home team beats" do
       nba_game = create(:nba_game)
       user = create(:user)
-
+      nba_offered_line = create(:nba_offered_line)
 
       params = %{
         "nba_game_id" => nba_game.id,
         "user_id" => user.id,
         "line" => -5,
-        "bet" => true
+        "bet" => true,
+        "nba_offered_line_id" => nba_offered_line.id
       }
 
       {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
@@ -127,13 +132,14 @@ defmodule NbaLineTest do
     test "home team underdog, bet for home team, home team lost to line" do
       nba_game = create(:nba_game)
       user = create(:user)
-
+      nba_offered_line = create(:nba_offered_line)
 
       params = %{
         "nba_game_id" => nba_game.id,
         "user_id" => user.id,
         "line" => -5,
-        "bet" => false
+        "bet" => false,
+        "nba_offered_line_id" => nba_offered_line.id
       }
 
       {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
@@ -148,13 +154,14 @@ defmodule NbaLineTest do
     test "home team underdog, bet against home team, home team beat" do
       nba_game = create(:nba_game)
       user = create(:user)
-
+      nba_offered_line = create(:nba_offered_line)
 
       params = %{
         "nba_game_id" => nba_game.id,
         "user_id" => user.id,
         "line" => -5,
-        "bet" => false
+        "bet" => false,
+        "nba_offered_line_id" => nba_offered_line.id
       }
 
       {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
@@ -169,12 +176,14 @@ defmodule NbaLineTest do
     test "home team underdog, bet against home team, home team lost to line" do
       nba_game = create(:nba_game)
       user = create(:user)
+      nba_offered_line = create(:nba_offered_line)
 
       params = %{
         "nba_game_id" => nba_game.id,
         "user_id" => user.id,
         "line" => -5,
-        "bet" => false
+        "bet" => false,
+        "nba_offered_line_id" => nba_offered_line.id
       }
 
       {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
@@ -189,12 +198,14 @@ defmodule NbaLineTest do
     test "home team underdog, bet against home team, push" do
       nba_game = create(:nba_game)
       user = create(:user)
+      nba_offered_line = create(:nba_offered_line)
 
       params = %{
         "nba_game_id" => nba_game.id,
         "user_id" => user.id,
         "line" => -5,
-        "bet" => false
+        "bet" => false,
+        "nba_offered_line_id" => nba_offered_line.id
       }
 
       {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
@@ -209,12 +220,14 @@ defmodule NbaLineTest do
     test "home team underdog, bet for home team, push" do
       nba_game = create(:nba_game)
       user = create(:user)
+      nba_offered_line = create(:nba_offered_line)
 
       params = %{
         "nba_game_id" => nba_game.id,
         "user_id" => user.id,
         "line" => -5,
-        "bet" => true
+        "bet" => true,
+        "nba_offered_line_id" => nba_offered_line.id
       }
 
       {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
@@ -229,12 +242,14 @@ defmodule NbaLineTest do
     test "home team favorite, bet for the home team, home team loses outright" do
       nba_game = create(:nba_game)
       user = create(:user)
+      nba_offered_line = create(:nba_offered_line)
 
       params = %{
         "nba_game_id" => nba_game.id,
         "user_id" => user.id,
         "line" => 5,
-        "bet" => true
+        "bet" => true,
+        "nba_offered_line_id" => nba_offered_line.id
       }
 
       {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
@@ -249,12 +264,14 @@ defmodule NbaLineTest do
     test "home team favorite, bet against the home team, home team loses outright" do
       nba_game = create(:nba_game)
       user = create(:user)
+      nba_offered_line = create(:nba_offered_line)
 
       params = %{
         "nba_game_id" => nba_game.id,
         "user_id" => user.id,
         "line" => 5,
-        "bet" => false
+        "bet" => false,
+        "nba_offered_line_id" => nba_offered_line.id
       }
 
       {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
@@ -269,12 +286,14 @@ defmodule NbaLineTest do
     test "home team favorite, bet for the home team, home team beats" do
       nba_game = create(:nba_game)
       user = create(:user)
+      nba_offered_line = create(:nba_offered_line)
 
       params = %{
         "nba_game_id" => nba_game.id,
         "user_id" => user.id,
         "line" => 5,
-        "bet" => true
+        "bet" => true,
+        "nba_offered_line_id" => nba_offered_line.id
       }
 
       {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
@@ -289,12 +308,14 @@ defmodule NbaLineTest do
     test "home team favorite, bet against the home team, home team beats" do
       nba_game = create(:nba_game)
       user = create(:user)
+      nba_offered_line = create(:nba_offered_line)
 
       params = %{
         "nba_game_id" => nba_game.id,
         "user_id" => user.id,
         "line" => 5,
-        "bet" => false
+        "bet" => false,
+        "nba_offered_line_id" => nba_offered_line.id
       }
 
       {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
@@ -309,12 +330,14 @@ defmodule NbaLineTest do
     test "home team favorite, bet for home team, home team lost to line" do
       nba_game = create(:nba_game)
       user = create(:user)
+      nba_offered_line = create(:nba_offered_line)
 
       params = %{
         "nba_game_id" => nba_game.id,
         "user_id" => user.id,
         "line" => 5,
-        "bet" => true
+        "bet" => true,
+        "nba_offered_line_id" => nba_offered_line.id
       }
 
       {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
@@ -329,12 +352,14 @@ defmodule NbaLineTest do
     test "home team favorite, bet against home team, home lost to line" do
       nba_game = create(:nba_game)
       user = create(:user)
+      nba_offered_line = create(:nba_offered_line)
 
       params = %{
         "nba_game_id" => nba_game.id,
         "user_id" => user.id,
         "line" => 5,
-        "bet" => false
+        "bet" => false,
+        "nba_offered_line_id" => nba_offered_line.id
       }
 
       {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
@@ -349,12 +374,14 @@ defmodule NbaLineTest do
     test "home team favorite, bet against home team, push" do
       nba_game = create(:nba_game)
       user = create(:user)
+      nba_offered_line = create(:nba_offered_line)
 
       params = %{
         "nba_game_id" => nba_game.id,
         "user_id" => user.id,
         "line" => 5,
-        "bet" => false
+        "bet" => false,
+        "nba_offered_line_id" => nba_offered_line.id
       }
 
       {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
@@ -369,12 +396,14 @@ defmodule NbaLineTest do
     test "home team favorite, bet for home team, push" do
       nba_game = create(:nba_game)
       user = create(:user)
+      nba_offered_line = create(:nba_offered_line)
 
       params = %{
         "nba_game_id" => nba_game.id,
         "user_id" => user.id,
         "line" => 5,
-        "bet" => true
+        "bet" => true,
+        "nba_offered_line_id" => nba_offered_line.id
       }
 
       {:ok, nba_line} = NbaLine.Api.create_nba_line(params)

@@ -4,7 +4,7 @@ defmodule NbaLinesServer.NbaGame do
     @optional_fields [:bet_count, :start_time, :clock, :period]
     @create_game_required_fields [:date, :home_team, :away_team, :start_time]
     @complete_game_required_fields [:home_team_score, :away_team_score, :completed]
-    @update_game_required_fields [:home_team_score, :away_team_score, :period, :clock]
+    @update_game_required_fields [:home_team_score, :away_team_score]
   
     @derive {Poison.Encoder, only: [
         :id, :date, :home_team, :home_team_score, :away_team, :away_team_score,
@@ -22,7 +22,10 @@ defmodule NbaLinesServer.NbaGame do
         field :period, :integer
         field :clock, :string
 
+        # representing how many bets were placed
         has_many :nba_lines, NbaLinesServer.NbaLine
+        # representing how many offered lines were registered
+        has_many :nba_offered_lines, NbaLinesServer.NbaOfferedLine
 
         timestamps()
     end

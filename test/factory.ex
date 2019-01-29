@@ -3,7 +3,18 @@ defmodule NbaLinesServer.Factory do
   
     alias NbaLinesServer.NbaGame
     alias NbaLinesServer.NbaLine
+    alias NbaLinesServer.NbaOfferedLine
     alias NbaLinesServer.User
+
+    def factory(:user) do
+        %User{
+            email: "test@test.com",
+            first_name: "joe",
+            last_name: "bloe",
+            password: "temp1234",
+            deleted: false
+        }
+    end
 
     def factory(:nba_game) do
         %NbaGame{
@@ -24,22 +35,20 @@ defmodule NbaLinesServer.Factory do
         }
     end
 
+    def factory(:nba_offered_line) do
+        %NbaOfferedLine{
+            nba_game: create(:nba_game),
+            line: -5.2
+        }
+    end
+
     def factory(:nba_line) do
         %NbaLine{
             nba_game: create(:nba_game),
             user: create(:user),
             line: -5,
-            bet: true
-        }
-    end
-
-    def factory(:user) do
-        %User{
-            email: "test@test.com",
-            first_name: "joe",
-            last_name: "bloe",
-            password: "temp1234",
-            deleted: false
+            bet: true,
+            nba_offered_line: create(:nba_offered_line)
         }
     end
 end  

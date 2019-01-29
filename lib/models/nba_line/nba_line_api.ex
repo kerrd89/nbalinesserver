@@ -30,7 +30,8 @@ defmodule NbaLine.Api do
         nba_game_id: params["nba_game_id"],
         line: params["line"],
         bet: params["bet"],
-        user_id: params["user_id"]
+        user_id: params["user_id"],
+        nba_offered_line_id: params["nba_offered_line_id"]
       })
   
       if nba_line_changeset.valid? do
