@@ -10,7 +10,8 @@ defmodule NbaGame.Api do
     @spec get_nba_games_by_date(date :: Date) :: list()
     def get_nba_games_by_date(date) do
         nba_game_query = from nba_game in NbaGame,
-                         where: nba_game.date == ^date
+                         where: nba_game.date == ^date,
+                         preload: [:nba_offered_lines]
  
         Repo.all(nba_game_query)
     end

@@ -29,7 +29,9 @@ defmodule NbaLinesServer.NbaGameChannelTest do
             create(:nba_game)
             create(:nba_game)
             create(:nba_game)
-            create(:nba_game)
+            test_game = create(:nba_game)
+            NbaOfferedLine.Api.create_nba_offered_line(%{"nba_game_id" => test_game.id, "line" => 5.3})
+            NbaOfferedLine.Api.create_nba_offered_line(%{"nba_game_id" => test_game.id, "line" => 5.6})
 
             {:ok, jwt, _full_claims} = NbaLinesServer.Guardian.encode_and_sign(user)
 
@@ -42,6 +44,12 @@ defmodule NbaLinesServer.NbaGameChannelTest do
             assert Enum.count(nba_games) == 4
             assert Enum.count(nba_games_resp) == 4
             assert nba_games_resp == nba_games
+
+            Enum.each(nba_games_resp, fn(nba_game_resp) ->
+                if nba_game_resp.id === test_game.id do
+                    assert Enum.count(nba_game_resp.nba_offered_lines) == 2
+                end
+            end)
         end
     end
 end

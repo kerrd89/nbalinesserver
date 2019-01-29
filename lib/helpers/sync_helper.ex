@@ -31,4 +31,13 @@ defmodule NbaLinesServer.SyncHelper do
     many nba_offered_lines, since this will be running on a cron job for games for today,
     and for games in the future.
     """
+    @spec sync_nba_offered_lines() :: {:ok, map()} | {:error, String.t()}
+    def sync_nba_offered_lines() do
+        Logger.info("syncing nba offered lines")
+        # date_today = Date.utc_today()
+
+        # get nba lines for today from remote api
+        # create records
+        # broadcast update to nba_game with nba_offered_lines
+    end
 end

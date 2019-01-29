@@ -59,6 +59,7 @@ defmodule NbaLineTest do
       {:ok, nba_line} = NbaLine.Api.create_nba_line(params)
 
       assert nba_line.nba_game_id == nba_game.id
+      assert nba_line.nba_offered_line_id == nba_offered_line.id
     end
   end
 

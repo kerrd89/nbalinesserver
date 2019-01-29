@@ -8,7 +8,9 @@ defmodule NbaLinesServer.NbaGame do
   
     @derive {Poison.Encoder, only: [
         :id, :date, :home_team, :home_team_score, :away_team, :away_team_score,
-        :completed, :bet_count, :updated_at, :start_time, :period, :clock]}
+        :completed, :bet_count, :updated_at, :start_time, :period, :clock,
+        :nba_offered_lines
+    ]}
 
     schema "nba_games" do
         field :date, :date
