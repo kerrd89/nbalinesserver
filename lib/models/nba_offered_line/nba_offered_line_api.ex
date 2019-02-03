@@ -40,10 +40,10 @@ defmodule NbaOfferedLine.Api do
       {:ok, %{status_code: 200, body: body}} ->
         events = Poison.decode!(body) |> Map.get("events", [])
 
-        Enum.each(events, fn(event) ->
-          IO.inspect Map.get(event, "event_id", nil)
-          IO.inspect Map.get(event, "teams_normalized", nil)
-        end)
+        # Enum.each(events, fn(event) ->
+        #   IO.inspect Map.get(event, "event_id", nil)
+        #   IO.inspect Map.get(event, "teams_normalized", nil)
+        # end)
 
         {:ok, events}
       {:ok, %{status_code: 404}} ->
