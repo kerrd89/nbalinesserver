@@ -2,6 +2,9 @@
 # and its dependencies with the aid of the Mix.Config module.
 use Mix.Config
 
+config :nba_lines_server,
+  rundown_api_token: System.get_env("RUNDOWN_TOKEN") || nil
+
 config :nba_lines_server, NbaLinesServer.Endpoint,
   http: [port: System.get_env("NBALINESSERVER_PORT") || 4001],
   url: [host: "192.168.0.152"],

@@ -156,7 +156,7 @@ defmodule NbaGame.Api do
                         case create_nba_game(params) do
                             {:ok, %NbaGame{}} ->
                                 acc + 1
-                            {:error, error} ->
+                            {:error, _error} ->
                                 acc
                         end
                     end)
