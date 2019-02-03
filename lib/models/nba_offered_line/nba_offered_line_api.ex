@@ -40,12 +40,31 @@ defmodule NbaOfferedLine.Api do
       {:ok, %{status_code: 200, body: body}} ->
         events = Poison.decode!(body) |> Map.get("events", [])
 
-        # Enum.each(events, fn(event) ->
-        #   IO.inspect Map.get(event, "event_id", nil)
-        #   IO.inspect Map.get(event, "teams_normalized", nil)
-        # end)
+        trim_events = Enum.map(events, fn(event) ->
+          lines = Map.get(event, "lines", %{})
+          lines_total = Enum.reduce(lines, 0, fn({_affiliate_id, line}, acc) ->
+            point_spread = Map.get(line, "spread", %{}) |> Map.get("point_spread_home")
 
-        {:ok, events}
+            acc + point_spread
+          end)
+          event_id = Map.get(event, "event_id", nil)
+          home_team = Map.get(event, "teams_normalized", nil)
+            |> Enum.find(fn(team) -> Map.get(team, "is_home", false) end)
+          away_team = Map.get(event, "teams_normalized", nil)
+            |> Enum.find(fn(team) -> Map.get(team, "is_away", false) end)
+          avg_line = lines_total/Enum.count(lines)
+          line_update_time = nil
+
+          %{
+            event_id: event_id,
+            home_team: home_team,
+            away_team: away_team,
+            avg_line: avg_line,
+            line_update_time: line_update_time
+          }
+        end)
+
+        {:ok, trim_events}
       {:ok, %{status_code: 404}} ->
         # do something with a 404
         {:error, "404"}
