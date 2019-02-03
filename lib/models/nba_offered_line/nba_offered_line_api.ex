@@ -53,14 +53,12 @@ defmodule NbaOfferedLine.Api do
           away_team = Map.get(event, "teams_normalized", nil)
             |> Enum.find(fn(team) -> Map.get(team, "is_away", false) end)
           avg_line = lines_total/Enum.count(lines)
-          line_update_time = nil
 
           %{
             event_id: event_id,
             home_team: home_team,
             away_team: away_team,
-            avg_line: avg_line,
-            line_update_time: line_update_time
+            avg_line: avg_line
           }
         end)
 
