@@ -1,10 +1,11 @@
 defmodule NbaLinesServer.NbaGame do
     use NbaLinesServer.Web, :model
   
-    @optional_fields [:bet_count, :start_time, :clock, :period]
+    @optional_fields [:bet_count, :start_time, :clock, :period, :event_id]
     @create_game_required_fields [:date, :home_team, :away_team, :start_time]
     @complete_game_required_fields [:home_team_score, :away_team_score, :completed]
     @update_game_required_fields [:home_team_score, :away_team_score]
+    @add_event_id_required_fields [:event_id]
   
     @derive {Poison.Encoder, only: [
         :id, :date, :home_team, :home_team_score, :away_team, :away_team_score,
@@ -23,6 +24,7 @@ defmodule NbaLinesServer.NbaGame do
         field :start_time, :naive_datetime
         field :period, :integer
         field :clock, :string
+        field :event_id, :string
 
         # representing how many bets were placed
         has_many :nba_lines, NbaLinesServer.NbaLine
@@ -51,5 +53,12 @@ defmodule NbaLinesServer.NbaGame do
         model
         |> cast(params, @update_game_required_fields ++ @optional_fields)
         |> validate_required(@update_game_required_fields)
+    end
+
+    @doc "changeset to add a missing event_id"
+    def event_id_changeset(model, params \\ :empty) do
+        model
+        |> cast(params, @add_event_id_required_fields)
+        |> validate_required(@add_event_id_required_fields)
     end
 end

@@ -54,6 +54,7 @@ defmodule NbaOfferedLineTest do
   end
 
   describe "get_events_by_sport_by_date/2" do
+    @tag api: true
     test "returns an events if token is valid" do
       use_cassette "get_events_by_sport_by_date" do
         past_date = Date.from_erl!({2019, 1, 24})
@@ -62,6 +63,45 @@ defmodule NbaOfferedLineTest do
 
         assert Enum.count(events) == 8
       end
+    end
+  end
+
+  describe "handle_nba_events/2" do
+    test "handles being given only date assuming [] events" do
+      date_today = Date.utc_today()
+      summary = NbaOfferedLine.Api.handle_nba_events(date_today)
+
+      assert summary.event_ids_added == 0
+      assert summary.offered_lines_created == 0
+    end
+
+    test "handles being given valid events when games have event_ids" do
+      date_today = Date.utc_today()
+      create(:nba_game, home_team: "CLE", away_team: "WAS")
+      create(:nba_game, home_team: "ATL", away_team: "CHI")
+
+      event_one = build(:event, home_team: "CLE", away_team: "WAS")
+      event_two = build(:event, home_team: "ATL", away_team: "CHI")
+
+      summary = NbaOfferedLine.Api.handle_nba_events(date_today, [event_one, event_two])
+
+      assert summary.event_ids_added == 0
+      assert summary.offered_lines_created == 2
+    end
+
+    test "handles being given valid events when games don't have event_ids" do
+      date_today = Date.utc_today()
+
+      create(:nba_game, home_team: "CLE", away_team: "WAS", event_id: nil)
+      create(:nba_game, home_team: "ATL", away_team: "CHI", event_id: nil)
+
+      event_one = build(:event, home_team: "CLE", away_team: "WAS")
+      event_two = build(:event, home_team: "ATL", away_team: "CHI")
+
+      summary = NbaOfferedLine.Api.handle_nba_events(date_today, [event_one, event_two])
+
+      assert summary.event_ids_added == 2
+      assert summary.offered_lines_created == 2
     end
   end
 end

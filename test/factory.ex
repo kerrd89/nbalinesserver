@@ -20,7 +20,8 @@ defmodule NbaLinesServer.Factory do
         %NbaGame{
             date: Date.utc_today(),
             home_team: "cavs",
-            away_team: "bulls"
+            away_team: "bulls",
+            event_id: "lakdfjldkfjaldkf"
         }
     end
 
@@ -31,7 +32,8 @@ defmodule NbaLinesServer.Factory do
             away_team: "bulls",
             home_team_score: 102,
             away_team_score: 100,
-            completed: true
+            completed: true,
+            event_id: "lakdfjldkfjaldkf"
         }
     end
 
@@ -49,6 +51,15 @@ defmodule NbaLinesServer.Factory do
             line: -5,
             bet: true,
             nba_offered_line: create(:nba_offered_line)
+        }
+    end
+
+    def factory(:event) do
+        %{
+            event_id: "lakdfjldkfjaldkf",
+            home_team: "CLE",
+            away_team: "WAS",
+            avg_line: 1.43
         }
     end
 end  

@@ -193,7 +193,7 @@ defmodule NbaGame.Api do
                 {:ok, %{status_code: 200, body: body}} ->
                     nba_games = Poison.decode!(body) |> Map.get("games", [])
 
-                    games_completed = Enum.reduce(nba_games, 0, fn(nba_game, acc) ->
+                    games_updated = Enum.reduce(nba_games, 0, fn(nba_game, acc) ->
                         home_team = Map.get(nba_game, "hTeam", %{}) |> Map.get("triCode", nil)
                         away_team = Map.get(nba_game, "vTeam", %{}) |> Map.get("triCode", nil)
                         home_team_score = Map.get(nba_game, "hTeam", %{}) |> Map.get("score", nil)
@@ -221,7 +221,7 @@ defmodule NbaGame.Api do
                             case update_nba_game(complete_params) do
                                 {:ok, %NbaGame{}} -> acc + 1
                                 {:error, error} ->
-                                    Logger.error(error)
+                                    Logger.error("#{inspect error}")
                                     acc
                             end
                         else
@@ -229,7 +229,7 @@ defmodule NbaGame.Api do
                         end
                     end)
 
-                    {:ok, games_completed}
+                    {:ok, games_updated}
                 {:ok, %{status_code: 404}} ->
                     # do something with a 404
                     {:error, "404"}
@@ -237,6 +237,29 @@ defmodule NbaGame.Api do
                     # do something with an error
                     {:error, reason}
             end
+        end
+    end
+
+    @doc "helper method to retrieve games by date, home team, away team"
+    @spec get_game_by_teams_and_date(date :: Date, home_team :: String.t(), away_team :: String.t()) :: NbaGame | nil
+    def get_game_by_teams_and_date(date, home_team, away_team) do
+        query = from nba_game in NbaGame,
+                    where: nba_game.date == ^date and
+                    nba_game.home_team == ^home_team and
+                    nba_game.away_team == ^away_team
+
+        Repo.one(query)
+    end
+
+    @doc "helper method to update nba_games to include an event_id, if it doesn't already exist"
+    @spec add_event_id(nba_game :: NbaGame, event_id :: String.t()) :: {:ok, NbaGame} | {:error, String.t()}
+    def add_event_id(nba_game, event_id) do
+        nba_game_changeset = NbaGame.event_id_changeset(nba_game, %{event_id: event_id})
+
+        if nba_game_changeset.valid? do
+            Repo.update(nba_game_changeset)
+        else
+            {:error, "error updating"}
         end
     end
 end

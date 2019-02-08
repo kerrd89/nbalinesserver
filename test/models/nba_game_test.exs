@@ -196,6 +196,7 @@ defmodule NbaGameTest do
   end
 
   describe "handle complete nba_games_by_date/1" do
+    @tag api: true
     test "returns a success tuple with the count of games completed" do
       use_cassette "get_nba_games_jan_16" do
         past_date = Date.from_erl!({2019, 1, 16})
@@ -205,10 +206,23 @@ defmodule NbaGameTest do
         assert games_created == 8
         assert Enum.count(NbaGame.Api.get_uncompleted_nba_games_by_date(past_date)) == 8
 
-        {:ok, games_completed} = NbaGame.Api.handle_update_nba_games_by_date(past_date)
+        {:ok, games_updated} = NbaGame.Api.handle_update_nba_games_by_date(past_date)
 
-        assert games_completed == 8
+        assert games_updated == 8
       end
+    end
+  end
+
+  describe "add_event_id/2" do
+    test "adds an event_id to an game if one is missing" do
+      event_id = "tjealdkjgflakfd"
+      nba_game = create(:nba_game, event_id: nil)
+
+      assert is_nil(nba_game.event_id)
+
+      {:ok, updated_nba_game} = NbaGame.Api.add_event_id(nba_game, event_id)
+
+      assert updated_nba_game.event_id == event_id
     end
   end
 end

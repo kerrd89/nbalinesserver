@@ -2,8 +2,6 @@ defmodule NbaOfferedLine.Api do
   alias NbaLinesServer.Repo
   alias NbaLinesServer.NbaOfferedLine
 
-  import Ecto.Query, only: [from: 2]
-
   @api_token Application.get_env(:nba_lines_server, :rundown_api_token, nil)
 
   @doc "helper method to create a nba_offered_line"
@@ -29,12 +27,12 @@ defmodule NbaOfferedLine.Api do
 
   @doc "helper method to get events by sport by date from rundown api"
   @spec get_events_by_sport_by_date(date :: Date, sport :: integer) :: {:ok, list(map())} | {:error, String.t()}
-  def get_events_by_sport_by_date(date, sport) when not is_nil(@api_token) do
+  def get_events_by_sport_by_date(date, sport \\ 4) do
     {year, month, day} = Date.to_erl(date)
     long_month = if month < 10, do: "0#{month}", else: "#{month}"
     long_day = if day < 10, do: "0#{day}", else: "#{day}"
 
-    url = "https://therundown-therundown-v1.p.rapidapi.com/sports/4/events/#{year}-#{month}-#{day}"
+    url = "https://therundown-therundown-v1.p.rapidapi.com/sports/#{sport}/events/#{year}-#{long_month}-#{long_day}"
 
     case HTTPoison.get url, ["X-RapidAPI-Key": @api_token] do
       {:ok, %{status_code: 200, body: body}} ->
@@ -53,7 +51,7 @@ defmodule NbaOfferedLine.Api do
           away_team = Map.get(event, "teams_normalized", nil)
             |> Enum.find(fn(team) -> Map.get(team, "is_away", false) end)
           avg_line = lines_total/Enum.count(lines)
-
+          # TODO: make struct for this
           %{
             event_id: event_id,
             home_team: home_team,
@@ -70,5 +68,39 @@ defmodule NbaOfferedLine.Api do
         # do something with an error
         {:error, reason}
     end
+  end
+
+  @doc """
+  helper method to handle events from the rundown api
+  adds event_ids to nba_games and creates offered lines from events
+  """
+  @spec handle_nba_events(date :: Date, events :: map()) :: {:ok, map()} | {:error, String.t()}
+  def handle_nba_events(date, events \\ []) do
+    Enum.reduce(events, %{event_ids_added: 0, offered_lines_created: 0}, fn(event, acc) ->
+      # match out values to be used from acc
+      %{event_ids_added: event_ids_added, offered_lines_created: offered_lines_created} = acc
+      # get nba_game relevant to this event
+      nba_game = NbaGame.Api.get_game_by_teams_and_date(date, event.home_team, event.away_team)
+
+      # if there is no event_id on the nba_game, add it and increment the accumulator
+      event_ids_added = if is_nil(nba_game.event_id) do
+        NbaGame.Api.add_event_id(nba_game, event.event_id)
+        event_ids_added + 1
+      else
+        event_ids_added
+      end
+
+      params = %{
+          "nba_game_id" => nba_game.id,
+          "line" => event.avg_line
+      }
+
+      {:ok, _nba_offered_line} = create_nba_offered_line(params)
+
+      %{
+        event_ids_added: event_ids_added,
+        offered_lines_created: offered_lines_created + 1
+      }
+    end)
   end
 end
