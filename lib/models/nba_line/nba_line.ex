@@ -1,7 +1,7 @@
 defmodule NbaLinesServer.NbaLine do
   use NbaLinesServer.Web, :model
   
-  @create_bet_required_fields [:line, :bet, :user_id, :nba_game_id, :nba_offered_line_id]
+  @create_bet_required_fields [:bet, :user_id, :nba_game_id, :nba_offered_line_id]
   @complete_bet_required_fields [:result]
     
   schema "nba_lines" do

@@ -1,6 +1,7 @@
 defmodule NbaLine.Api do
   alias NbaLinesServer.Repo
   alias NbaLinesServer.NbaLine
+  alias NbaLinesServer.NbaOfferedLine
 
   import Ecto.Query, only: [from: 2]
 
@@ -10,7 +11,7 @@ defmodule NbaLine.Api do
 
   @doc "helper method to get all nba lines"
   @spec get_nba_lines_by_user_id(user_id :: integer()) :: list()
-  def get_nba_lines_by_user_id(user_id) do
+  def get_nba_lines_by_user_id(user_id) when not is_nil(user_id) do
     nba_lines_query = from nba_line in NbaLine,
                       where: nba_line.user_id == ^user_id
 
@@ -28,14 +29,15 @@ defmodule NbaLine.Api do
     else
       nba_line_changeset = NbaLine.create_bet_changeset(%NbaLine{}, %{
         nba_game_id: params["nba_game_id"],
-        line: params["line"],
         bet: params["bet"],
         user_id: params["user_id"],
         nba_offered_line_id: params["nba_offered_line_id"]
       })
   
       if nba_line_changeset.valid? do
-        Repo.insert(nba_line_changeset)
+        nba_offered_line = Repo.insert!(nba_line_changeset) |> Repo.preload([:nba_offered_line])
+
+        {:ok, nba_offered_line}
       else
         {:error, nba_line_changeset.errors}
       end
@@ -44,7 +46,9 @@ defmodule NbaLine.Api do
 
   @doc "helper method to complete an nba_line"
   @spec complete_nba_line(nba_line :: NbaLine, params :: map()) :: {:ok, NbaLine} | {:error, String.t}
-  def complete_nba_line(%NbaLine{line: line, bet: bet} = nba_line, params) do
+  def complete_nba_line(%NbaLine{nba_offered_line: %NbaOfferedLine{line: line},
+    bet: bet} = nba_line, params)
+  do
     # final_difference always represents home_team vs. away_team
     # line always represents points to or against the home team
     # bet always represents true false statement about line
@@ -105,7 +109,8 @@ defmodule NbaLine.Api do
   def get_lines_for_game(nba_game_id) do
     nba_line_query = from nba_line in NbaLine,
                     where: nba_line.nba_game_id == ^nba_game_id
-                    and is_nil(nba_line.result)
+                    and is_nil(nba_line.result),
+                    preload: [:nba_offered_line]
 
     Repo.all(nba_line_query)
   end
