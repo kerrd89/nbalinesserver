@@ -8,7 +8,6 @@ defmodule NbaLinesServer.NbaLine do
       belongs_to :nba_game, NbaLinesServer.NbaGame
       belongs_to :user, NbaLinesServer.User
       belongs_to :nba_offered_line, NbaLinesServer.NbaOfferedLine
-      field :line, :integer
 
       # boolean represents if user choose above or below line
       field :bet, :boolean

@@ -22,6 +22,8 @@ defmodule NbaLinesServer.SyncHelper do
 
         Logger.info("synced nba games: games_created - #{games_created} games_updated - #{games_updated}")
 
+        # broadcast update to nba_games, preloaded with offered lines order_by inserted_at
+
         {:ok, %{games_created: games_created, games_updated: games_updated}}
     end
 
@@ -40,18 +42,16 @@ defmodule NbaLinesServer.SyncHelper do
         {:ok, events} = NbaOfferedLine.Api.get_events_by_sport_by_date(date_today)
 
         summary = NbaOfferedLine.Api.handle_nba_events(date_today, events)
+
         Logger.info("synced offered lines: event_ids_added - #{summary.event_ids_added}, offered_lined_created - #{summary.offered_lines_created}")
 
         # future opportunity to get all lines, track when updated, and provide realtime data
         # currently, since we are taking the avg, it can constantly change, we create each time
 
-        # broadcast update to nba_game with nba_offered_lines
+        # broadcast update to nba_games, preloaded with offered lines order_by inserted_at
 
         # when creating games by day, we should get the event_ids already
         # getting games by day should also include getting events by sport by day endpoint
         # limited to 100 api calls a day, pre-populating event_ids
-
-        # remove line from nba_line
-        # replace logic referencing it with nba_line.offered_line.line, which is a float
     end
 end

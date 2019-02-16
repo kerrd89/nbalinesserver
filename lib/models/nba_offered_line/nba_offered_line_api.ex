@@ -1,4 +1,6 @@
 defmodule NbaOfferedLine.Api do
+  require Logger
+
   alias NbaLinesServer.Repo
   alias NbaLinesServer.NbaOfferedLine
 
@@ -35,6 +37,10 @@ defmodule NbaOfferedLine.Api do
     url = "https://therundown-therundown-v1.p.rapidapi.com/sports/#{sport}/events/#{year}-#{long_month}-#{long_day}"
 
     case HTTPoison.get url, ["X-RapidAPI-Key": @api_token] do
+      {:ok, %{status_code: 401, body: body}} ->
+        Logger.error"#{inspect body}"
+
+        {:error, %{message: body}}
       {:ok, %{status_code: 200, body: body}} ->
         events = Poison.decode!(body) |> Map.get("events", [])
 
@@ -79,23 +85,33 @@ defmodule NbaOfferedLine.Api do
     Enum.reduce(events, %{event_ids_added: 0, offered_lines_created: 0}, fn(event, acc) ->
       # match out values to be used from acc
       %{event_ids_added: event_ids_added, offered_lines_created: offered_lines_created} = acc
+
+      home_team_abbreviation =  Map.get(event.home_team, "abbreviation", nil)
+      away_team_abbreviation =  Map.get(event.away_team, "abbreviation", nil)
       # get nba_game relevant to this event
-      nba_game = NbaGame.Api.get_game_by_teams_and_date(date, event.home_team, event.away_team)
+      nba_game = NbaGame.Api.get_game_by_teams_and_date(date, home_team_abbreviation, away_team_abbreviation)
 
-      # if there is no event_id on the nba_game, add it and increment the accumulator
-      event_ids_added = if is_nil(nba_game.event_id) do
-        NbaGame.Api.add_event_id(nba_game, event.event_id)
-        event_ids_added + 1
+      # handle case where nba_game is nil
+      if is_nil(nba_game) do
+        Logger.warn("game not found for event #{inspect event}")
+
+        acc
       else
-        event_ids_added
+        # if there is no event_id on the nba_game, add it and increment the accumulator
+        event_ids_added = if is_nil(nba_game.event_id) do
+          NbaGame.Api.add_event_id(nba_game, event.event_id)
+          event_ids_added + 1
+        else
+          event_ids_added
+        end
+
+        params = %{
+            "nba_game_id" => nba_game.id,
+            "line" => event.avg_line
+        }
+
+        {:ok, _nba_offered_line} = create_nba_offered_line(params)
       end
-
-      params = %{
-          "nba_game_id" => nba_game.id,
-          "line" => event.avg_line
-      }
-
-      {:ok, _nba_offered_line} = create_nba_offered_line(params)
 
       %{
         event_ids_added: event_ids_added,

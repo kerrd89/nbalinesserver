@@ -28,6 +28,10 @@ if Mix.env != :test do
       sync_nba_games: [
         schedule: "*/20 * * * *",
         task: {NbaLinesServer.SyncHelper, :sync_nba_games, []}
+      ],
+      sync_nba_offered_lines: [
+        schedule: "*/180 * * * *",
+        task: {NbaLinesServer.SyncHelper, :sync_nba_offered_lines, []}
       ]
     ]
 else

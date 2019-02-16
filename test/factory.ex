@@ -48,7 +48,6 @@ defmodule NbaLinesServer.Factory do
         %NbaLine{
             nba_game: create(:nba_game),
             user: create(:user),
-            line: -5,
             bet: true,
             nba_offered_line: create(:nba_offered_line)
         }

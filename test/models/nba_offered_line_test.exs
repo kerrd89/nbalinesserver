@@ -56,13 +56,11 @@ defmodule NbaOfferedLineTest do
   describe "get_events_by_sport_by_date/2" do
     @tag api: true
     test "returns an events if token is valid" do
-      use_cassette "get_events_by_sport_by_date" do
-        past_date = Date.from_erl!({2019, 1, 24})
+        past_date = Date.from_erl!({ 2019, 2, 15 })
 
-        {:ok, events} = NbaOfferedLine.Api.get_events_by_sport_by_date(past_date, 1)
+        {:ok, events} = NbaOfferedLine.Api.get_events_by_sport_by_date(past_date, 4)
 
-        assert Enum.count(events) == 8
-      end
+        assert Enum.count(events) == 3
     end
   end
 
