@@ -16,6 +16,17 @@ defmodule NbaGame.Api do
         Repo.all(nba_game_query)
     end
 
+    @doc "heloper method to get nba_games within a given date range"
+    @spec get_nba_games_by_range(start_date :: Date, end_date :: Date) :: list()
+    def get_nba_games_by_range(start_date, end_date) do
+        nba_game_query = from nba_game in NbaGame,
+        where: nba_game.date >= ^start_date and
+        nba_game.date <= ^end_date,
+        preload: [:nba_offered_lines]
+
+        Repo.all(nba_game_query)
+    end
+
     @doc "helper method to get date records for nba_games which have not been completed"
     @spec get_uncompleted_nba_game_dates() :: list(Date)
     def get_uncompleted_nba_game_dates() do

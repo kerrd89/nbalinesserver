@@ -86,10 +86,8 @@ defmodule NbaOfferedLine.Api do
       # match out values to be used from acc
       %{event_ids_added: event_ids_added, offered_lines_created: offered_lines_created} = acc
 
-      home_team_abbreviation =  Map.get(event.home_team, "abbreviation", nil)
-      away_team_abbreviation =  Map.get(event.away_team, "abbreviation", nil)
       # get nba_game relevant to this event
-      nba_game = NbaGame.Api.get_game_by_teams_and_date(date, home_team_abbreviation, away_team_abbreviation)
+      nba_game = NbaGame.Api.get_game_by_teams_and_date(date, event.home_team, event.away_team)
 
       # handle case where nba_game is nil
       if is_nil(nba_game) do

@@ -225,4 +225,33 @@ defmodule NbaGameTest do
       assert updated_nba_game.event_id == event_id
     end
   end
+
+  describe "get_nba_games_by_range/2" do
+    test "returns empty array if non exist" do
+      today = Date.utc_today()
+      last_week = Date.add(today, -7)
+
+      nba_games = NbaGame.Api.get_nba_games_by_range(last_week, today)
+
+      assert nba_games == []
+    end
+
+    test "returns correct games" do
+      today = Date.utc_today()
+      yesterday = Date.add(today, -1)
+      two_days_ago = Date.add(today, -2)
+      three_days_ago = Date.add(today, -3)
+      four_days_ago = Date.add(today, -4)
+
+      _game_today = create(:nba_game, date: today)
+      _game_yesterday = create(:nba_game, date: yesterday)
+      _game_two_days_ago = create(:nba_game, date: two_days_ago)
+      _game_three_days_ago = create(:nba_game, date: three_days_ago)
+      _game_four_days_ago = create(:nba_game, date: four_days_ago)
+
+      nba_games = NbaGame.Api.get_nba_games_by_range(three_days_ago, yesterday)
+
+      assert Enum.count(nba_games) == 3
+    end
+  end
 end
