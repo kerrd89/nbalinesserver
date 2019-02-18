@@ -111,12 +111,12 @@ defmodule NbaOfferedLine.Api do
         }
 
         {:ok, _nba_offered_line} = create_nba_offered_line(params)
-      end
 
-      %{
-        event_ids_added: event_ids_added,
-        offered_lines_created: offered_lines_created + 1
-      }
+        %{
+          event_ids_added: event_ids_added,
+          offered_lines_created: offered_lines_created + 1
+        }
+      end
     end)
   end
 end

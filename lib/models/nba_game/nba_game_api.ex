@@ -202,30 +202,40 @@ defmodule NbaGame.Api do
                         clock = Map.get(nba_game, "clock", nil)
                         status_num = Map.get(nba_game, "statusNum", 1)
 
-                        # assumption at this date is that games are only for this day, only check for teams
-                        uncompleted_game = uncompleted_nba_games |> Enum.find(fn(search) ->
-                            search.home_team == home_team and search.away_team == away_team
-                        end)
+                        if home_team_score == "" and away_team_score == "" do
+                            Logger.warn("game not worth updating, no scores #{inspect home_team} #{inspect away_team}")
 
-                        # if the game exists
-                        if not is_nil(uncompleted_game) do
-                            complete_params = %{
-                                "nba_game_id" => uncompleted_game.id,
-                                "home_team_score" => home_team_score,
-                                "away_team_score" => away_team_score,
-                                "period" => period,
-                                "clock" => clock,
-                                "is_finished?" => status_num == 3
-                            }
-
-                            case update_nba_game(complete_params) do
-                                {:ok, %NbaGame{}} -> acc + 1
-                                {:error, error} ->
-                                    Logger.error("#{inspect error}")
-                                    acc
-                            end
-                        else
                             acc
+                        else
+                            {home_team_score_int, _} = Integer.parse(home_team_score)
+                            {away_team_score_int, _} = Integer.parse(away_team_score)
+
+                            # assumption at this date is that games are only for this day, only check for teams
+                            uncompleted_game = uncompleted_nba_games |> Enum.find(fn(search) ->
+                                search.home_team == home_team and search.away_team == away_team
+                            end)
+
+                            # if the game exists
+                            if not is_nil(uncompleted_game) do
+                                complete_params = %{
+                                    "nba_game_id" => uncompleted_game.id,
+                                    "home_team_score" => home_team_score_int,
+                                    "away_team_score" => away_team_score_int,
+                                    "period" => period,
+                                    "clock" => clock,
+                                    "is_finished?" => status_num == 3
+                                }
+    
+                                case update_nba_game(complete_params) do
+                                    {:ok, %NbaGame{}} -> acc + 1
+                                    {:error, error} ->
+                                        Logger.error("#{inspect error}")
+                                        acc
+                                end
+                            else
+                                Logger.warn("game not updated #{inspect nba_game}")
+                                acc
+                            end
                         end
                     end)
 
