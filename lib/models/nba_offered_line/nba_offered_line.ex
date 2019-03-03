@@ -2,7 +2,9 @@ defmodule NbaLinesServer.NbaOfferedLine do
   use NbaLinesServer.Web, :model
   
   @create_offered_line_required_fields [:line, :nba_game_id]
-    
+  
+  @derive {Poison.Encoder, only: [:nba_game_id, :line]}
+
   schema "nba_offered_lines" do
       belongs_to :nba_game, NbaLinesServer.NbaGame
       field :line, :float

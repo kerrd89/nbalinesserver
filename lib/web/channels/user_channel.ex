@@ -29,6 +29,7 @@ defmodule NbaLinesServer.UserChannel do
   
     @doc "Handle marking an alert as awknowledged"
     def handle_in("pick_line", params, socket) do
+        # if NbaLine.Api.user_has_picked_game? or game_has_started? or game_has_finished?
         case NbaLine.Api.create_nba_line(params) do
             {:ok, %NbaLinesServer.NbaLine{}} ->
                 nba_lines = NbaLine.Api.get_nba_lines_by_user_id(params["user_id"])

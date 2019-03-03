@@ -27,6 +27,17 @@ defmodule NbaOfferedLine.Api do
     end
   end
 
+  @doc "helper method to map the abbreviation for nba lines to the the tricode from the nba"
+  @spec map_abbr_to_tricode(abbr :: String.t()) :: String.t()
+  def map_abbr_to_tricode(abbr) do
+    case abbr do
+      "NO" -> "NOP"
+      "UTAH" -> "UTA"
+      "SA" -> "SAS"
+      _ -> abbr
+    end
+  end
+
   @doc "helper method to get events by sport by date from rundown api"
   @spec get_events_by_sport_by_date(date :: Date, sport :: integer) :: {:ok, list(map())} | {:error, String.t()}
   def get_events_by_sport_by_date(date, sport \\ 4) do
@@ -54,8 +65,12 @@ defmodule NbaOfferedLine.Api do
           event_id = Map.get(event, "event_id", nil)
           home_team = Map.get(event, "teams_normalized", nil)
             |> Enum.find(fn(team) -> Map.get(team, "is_home", false) end)
+            |> Map.get("abbreviation")
+            |> map_abbr_to_tricode()
           away_team = Map.get(event, "teams_normalized", nil)
             |> Enum.find(fn(team) -> Map.get(team, "is_away", false) end)
+            |> Map.get("abbreviation")
+            |> map_abbr_to_tricode()
           avg_line = lines_total/Enum.count(lines)
           # TODO: make struct for this
           %{
@@ -85,17 +100,15 @@ defmodule NbaOfferedLine.Api do
     Enum.reduce(events, %{event_ids_added: 0, offered_lines_created: 0}, fn(event, acc) ->
       # match out values to be used from acc
       %{event_ids_added: event_ids_added, offered_lines_created: offered_lines_created} = acc
-      home_team_abbr =  Map.get(event.home_team, "abbreviation", nil)
-      away_team_abbr =  Map.get(event.away_team, "abbreviation", nil)
-
       # get nba_game relevant to this event
-      nba_game = NbaGame.Api.get_game_by_teams_and_date(date, home_team_abbr, away_team_abbr)
+      nba_game = NbaGame.Api.get_game_by_teams_and_date(date, event.home_team, event.away_team)
 
       # handle case where nba_game is nil
       if is_nil(nba_game) do
         Logger.warn("game not found for event #{inspect event}")
 
         acc
+
       else
         # if there is no event_id on the nba_game, add it and increment the accumulator
         event_ids_added = if is_nil(nba_game.event_id) do
@@ -106,8 +119,8 @@ defmodule NbaOfferedLine.Api do
         end
 
         params = %{
-            "nba_game_id" => nba_game.id,
-            "line" => event.avg_line
+          "nba_game_id" => nba_game.id,
+          "line" => event.avg_line
         }
 
         {:ok, _nba_offered_line} = create_nba_offered_line(params)
